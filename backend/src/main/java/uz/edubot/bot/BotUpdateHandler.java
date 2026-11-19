@@ -63,6 +63,15 @@ class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         this.miniAppUrl = miniAppUrl;
     }
 
+    /**
+     * Processes updates on the polling thread instead of the library's shared (non-daemon)
+     * executor, so shutting the application down never leaves stray threads running.
+     */
+    @Override
+    public void consume(List<Update> updates) {
+        updates.forEach(this::consume);
+    }
+
     @Override
     public void consume(Update update) {
         if (!update.hasMessage() || !update.getMessage().isUserMessage()) {
