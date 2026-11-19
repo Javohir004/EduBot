@@ -56,8 +56,14 @@ public class EducationCenter {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    public EducationCenter(String name, CenterStatus status) {
+    public EducationCenter(String name, String phone, String address, CenterStatus status) {
         this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.status = status;
+    }
+
+    void changeStatus(CenterStatus status) {
         this.status = status;
     }
 }

@@ -57,4 +57,8 @@ public class CenterMembership {
         this.role = role;
         this.status = MembershipStatus.ACTIVE;
     }
+
+    void activate() {
+        this.status = MembershipStatus.ACTIVE;
+    }
 }

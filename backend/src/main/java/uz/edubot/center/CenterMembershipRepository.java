@@ -1,12 +1,15 @@
 package uz.edubot.center;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface CenterMembershipRepository extends JpaRepository<CenterMembership, UUID> {
+
+    Optional<CenterMembership> findByCenterIdAndUserIdAndRole(UUID centerId, UUID userId, MembershipRole role);
 
     @Query("""
             select new uz.edubot.center.MembershipView(m.id, c.id, c.name, m.role)

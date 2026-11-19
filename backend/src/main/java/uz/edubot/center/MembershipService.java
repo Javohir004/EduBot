@@ -14,6 +14,19 @@ public class MembershipService {
     private final CenterMembershipRepository repository;
 
     /**
+     * Grants the role in the center; re-activates a previously revoked membership. Idempotent.
+     */
+    @Transactional
+    public CenterMembership grant(UUID centerId, UUID userId, MembershipRole role) {
+        return repository.findByCenterIdAndUserIdAndRole(centerId, userId, role)
+                .map(existing -> {
+                    existing.activate();
+                    return existing;
+                })
+                .orElseGet(() -> repository.save(new CenterMembership(centerId, userId, role)));
+    }
+
+    /**
      * Active memberships of the user in active centers only.
      */
     @Transactional(readOnly = true)

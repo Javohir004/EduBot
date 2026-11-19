@@ -10,7 +10,7 @@ import uz.edubot.center.MembershipService;
 import uz.edubot.center.MembershipView;
 import uz.edubot.common.error.ApiException;
 import uz.edubot.security.AccessToken;
-import uz.edubot.security.AuthenticatedUser;
+import uz.edubot.security.CurrentMember;
 import uz.edubot.security.PlatformProperties;
 import uz.edubot.security.TokenService;
 import uz.edubot.security.telegram.InvalidInitDataException;
@@ -59,8 +59,8 @@ class AuthService {
     }
 
     @Transactional(readOnly = true)
-    AuthResponse selectMembership(AuthenticatedUser principal, UUID membershipId) {
-        AppUser user = loadUser(principal);
+    AuthResponse selectMembership(CurrentMember member, UUID membershipId) {
+        AppUser user = loadUser(member);
         List<MembershipView> memberships = membershipService.findActiveForUser(user.getId());
         MembershipView selected = memberships.stream()
                 .filter(m -> m.membershipId().equals(membershipId))
@@ -70,14 +70,10 @@ class AuthService {
     }
 
     @Transactional(readOnly = true)
-    MeResponse me(AuthenticatedUser principal) {
-        AppUser user = loadUser(principal);
-        List<MembershipView> memberships = membershipService.findActiveForUser(user.getId());
-        // A membership revoked after the token was issued is no longer reported as active.
-        UUID activeId = principal.membershipId()
-                .filter(id -> memberships.stream().anyMatch(m -> m.membershipId().equals(id)))
-                .orElse(null);
-        return MeResponse.of(user, memberships, activeId);
+    MeResponse me(CurrentMember member) {
+        AppUser user = loadUser(member);
+        // The membership in the token was already re-validated against the database.
+        return MeResponse.of(user, membershipService.findActiveForUser(user.getId()), member.membershipId());
     }
 
     private AuthResponse respond(AppUser user, List<MembershipView> memberships, MembershipView active) {
@@ -86,8 +82,8 @@ class AuthService {
         return new AuthResponse(token.value(), token.expiresAt(), MeResponse.of(user, memberships, activeId));
     }
 
-    private AppUser loadUser(AuthenticatedUser principal) {
-        return userService.findById(principal.userId())
+    private AppUser loadUser(CurrentMember member) {
+        return userService.findById(member.userId())
                 .orElseThrow(() -> ApiException.unauthorized("USER_NOT_FOUND", "Authentication required"));
     }
 }

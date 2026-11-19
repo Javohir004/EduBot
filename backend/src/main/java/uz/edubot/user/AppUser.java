@@ -61,6 +61,10 @@ public class AppUser {
         this.languageCode = languageCode;
     }
 
+    void verifyPhone(String normalizedPhone) {
+        this.verifiedPhone = normalizedPhone;
+    }
+
     void changePlatformRole(PlatformRole platformRole) {
         this.platformRole = platformRole;
     }

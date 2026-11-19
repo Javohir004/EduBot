@@ -20,12 +20,31 @@ public class UserService {
      */
     @Transactional
     public AppUser upsertFromTelegram(TelegramProfile profile, boolean platformAdmin) {
+        AppUser user = upsertFromTelegram(profile);
+        user.changePlatformRole(platformAdmin ? PlatformRole.SUPER_ADMIN : null);
+        return user;
+    }
+
+    /**
+     * Creates or refreshes the user without touching the platform role (used by the bot).
+     */
+    @Transactional
+    public AppUser upsertFromTelegram(TelegramProfile profile) {
         repository.insertIfAbsent(profile.telegramId(), profile.firstName());
         AppUser user = repository.findByTelegramId(profile.telegramId())
                 .orElseThrow(() -> new IllegalStateException("User row missing after upsert"));
         user.updateProfile(profile.firstName(), profile.lastName(), profile.username(), profile.languageCode());
-        user.changePlatformRole(platformAdmin ? PlatformRole.SUPER_ADMIN : null);
         return user;
+    }
+
+    /**
+     * Stores a phone number that Telegram verified (shared via the contact button).
+     */
+    @Transactional
+    public void markPhoneVerified(UUID userId, String normalizedPhone) {
+        repository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + userId))
+                .verifyPhone(normalizedPhone);
     }
 
     @Transactional(readOnly = true)

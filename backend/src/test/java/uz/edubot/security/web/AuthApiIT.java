@@ -42,7 +42,7 @@ class AuthApiIT {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table center_membership, center_settings, subscription, entitlement_override, "
+        jdbc.execute("truncate table invite, center_membership, center_settings, subscription, entitlement_override, "
                 + "education_center, app_user cascade");
     }
 
@@ -178,17 +178,16 @@ class AuthApiIT {
     }
 
     @Test
-    void revokedMembershipIsNotReportedAsActive() throws Exception {
+    void revokedMembershipRejectsBoundToken() throws Exception {
         loginAndGetToken(1010L, "Revoked");
         UUID membershipId = createMembership(createCenter("Alpha", "ACTIVE"), 1010L, "ADMIN");
         String token = loginAndGetToken(1010L, "Revoked");
 
         jdbc.update("update center_membership set status = 'REVOKED' where id = ?", membershipId);
 
+        // The client re-authenticates with initData and gets an unbound token.
         mvc.perform(get("/api/v1/me").header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.activeMembershipId").value(nullValue()))
-                .andExpect(jsonPath("$.memberships", hasSize(0)));
+                .andExpect(status().isUnauthorized());
     }
 
     private org.springframework.test.web.servlet.RequestBuilder login(long telegramId, String firstName) {

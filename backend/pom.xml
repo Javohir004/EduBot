@@ -20,6 +20,7 @@
         <java.version>21</java.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <springdoc.version>3.2.0</springdoc.version>
+        <telegrambots.version>10.3.0</telegrambots.version>
     </properties>
 
     <dependencies>
@@ -75,6 +76,18 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Telegram Bot API -->
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-longpolling</artifactId>
+            <version>${telegrambots.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-client</artifactId>
+            <version>${telegrambots.version}</version>
         </dependency>
 
         <!-- Annotations only (module metadata); verification runs in tests -->

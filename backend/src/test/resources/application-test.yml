@@ -6,3 +6,7 @@ edubot:
     secret: test-only-jwt-secret-0123456789-abcdefghij
   platform:
     admin-telegram-ids: 999000
+  bot:
+    enabled: false
+  app:
+    public-url: https://app.example.test
