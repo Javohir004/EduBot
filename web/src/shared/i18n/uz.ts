@@ -18,6 +18,7 @@ export const uz = {
     noCenterTitle: 'Siz hali markazga ulanmagansiz',
     noCenterText:
       'Markaz administratori yuborgan taklif havolasini oching. O‘quv markazingizni EduBot’ga ulamoqchi bo‘lsangiz, biz bilan bog‘laning.',
+    recheck: 'Qayta tekshirish',
     pickCenterTitle: 'Markazni tanlang',
     pickCenterText: 'Siz bir nechta markazda ro‘yxatdan o‘tgansiz.',
   },

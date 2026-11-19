@@ -12,6 +12,8 @@ export interface AuthContextValue {
   activeMembership: MembershipDto | null
   isPlatformAdmin: boolean
   selectMembership(membershipId: string): Promise<void>
+  /** Re-authenticates with the current initData (e.g. after accepting an invite in the bot). */
+  refresh(): Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

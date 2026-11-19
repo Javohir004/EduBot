@@ -57,6 +57,11 @@ export function AuthProvider({ children, render }: { children: ReactNode; render
     [applyAuth],
   )
 
+  const refresh = useCallback(async () => {
+    const webApp = getWebApp()
+    if (webApp) applyAuth(await exchangeInitData(webApp.initData))
+  }, [applyAuth])
+
   const value = useMemo<AuthContextValue | null>(() => {
     if (state.status !== 'ready') return null
     const { me } = state
@@ -65,8 +70,9 @@ export function AuthProvider({ children, render }: { children: ReactNode; render
       activeMembership: me.memberships.find((m) => m.id === me.activeMembershipId) ?? null,
       isPlatformAdmin: me.user.platformRole === 'SUPER_ADMIN',
       selectMembership,
+      refresh,
     }
-  }, [state, selectMembership])
+  }, [state, selectMembership, refresh])
 
   return <AuthContext.Provider value={value}>{value ? children : render(state)}</AuthContext.Provider>
 }

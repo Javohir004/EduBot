@@ -28,6 +28,7 @@ describe('StudentBalance', () => {
       activeMembership: { id: 'M', centerId: 'C', centerName: 'Alpha', role: 'OWNER' as const },
       isPlatformAdmin: false,
       selectMembership: async () => {},
+      refresh: async () => {},
     }
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
