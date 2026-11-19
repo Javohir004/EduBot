@@ -60,3 +60,15 @@ edubot:
     ttl: 8h
   platform:
     admin-telegram-ids: ${PLATFORM_ADMIN_TELEGRAM_IDS:}
+  bot:
+    enabled: ${TELEGRAM_BOT_ENABLED:true}
+  scheduling:
+    enabled: ${SCHEDULING_ENABLED:true}
+  notifications:
+    dispatch-interval: 10s
+  demo:
+    # Only used with the "demo" Spring profile: this Telegram user owns the demo center.
+    owner-telegram-id: ${DEMO_OWNER_TELEGRAM_ID:}
+  app:
+    # HTTPS URL of the Mini App (required by Telegram for web_app buttons)
+    public-url: ${MINI_APP_URL:}

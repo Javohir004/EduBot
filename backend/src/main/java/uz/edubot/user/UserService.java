@@ -47,6 +47,14 @@ public class UserService {
                 .verifyPhone(normalizedPhone);
     }
 
+    /** Returns the user, creating a minimal one if absent; an existing profile is not modified. */
+    @Transactional
+    public AppUser ensureExists(long telegramId, String firstName) {
+        repository.insertIfAbsent(telegramId, firstName);
+        return repository.findByTelegramId(telegramId)
+                .orElseThrow(() -> new IllegalStateException("User row missing after insert"));
+    }
+
     /** The user pressed /start: the bot can message them again. */
     @Transactional
     public void markBotStarted(TelegramProfile profile) {
