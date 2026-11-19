@@ -2,6 +2,9 @@ package uz.edubot.teacher;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +23,12 @@ interface TeacherRepository extends TenantScopedRepository<Teacher> {
     Page<Teacher> search(@Param("status") PersonStatus status, @Param("pattern") String pattern, Pageable pageable);
 
     long countByStatus(PersonStatus status);
+
+    @Query("select t.id from Teacher t where t.userId = :userId")
+    Optional<UUID> findIdByUserId(@Param("userId") UUID userId);
+
+    @Query("select t from Teacher t where t.id in :ids")
+    List<Teacher> findByIds(@Param("ids") Collection<UUID> ids);
 
     /** Native with an explicit center id: runs inside the invite-accept session, which has no tenant. */
     @Modifying

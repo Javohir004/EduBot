@@ -1,7 +1,12 @@
 package uz.edubot.teacher;
 
 import java.time.Clock;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -41,6 +46,30 @@ public class TeacherService {
     public Teacher get(UUID id) {
         return teachers.findById(id)
                 .orElseThrow(() -> ApiException.notFound("TEACHER_NOT_FOUND", "Teacher not found"));
+    }
+
+    /** The teacher profile linked to a Telegram user in the current center, if any. */
+    @Transactional(readOnly = true)
+    public Optional<UUID> findIdByUserId(UUID userId) {
+        return teachers.findIdByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, Teacher> findByIds(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return teachers.findByIds(ids).stream().collect(Collectors.toMap(Teacher::getId, Function.identity()));
+    }
+
+    /** Fails unless the teacher exists in the current center and is not archived. */
+    @Transactional(readOnly = true)
+    public Teacher requireActive(UUID id) {
+        Teacher teacher = get(id);
+        if (teacher.getStatus() != PersonStatus.ACTIVE) {
+            throw new ApiException(HttpStatus.CONFLICT, "TEACHER_ARCHIVED", "Teacher is archived");
+        }
+        return teacher;
     }
 
     @Transactional

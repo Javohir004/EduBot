@@ -26,6 +26,9 @@ interface StudentRepository extends TenantScopedRepository<Student> {
     Page<Student> search(@Param("status") PersonStatus status, @Param("pattern") String pattern, Pageable pageable);
 
     long countByStatus(PersonStatus status);
+
+    @Query("select s from Student s where s.id in :ids")
+    List<Student> findByIds(@Param("ids") Collection<UUID> ids);
 }
 
 interface GuardianRepository extends TenantScopedRepository<Guardian> {

@@ -1,12 +1,14 @@
 package uz.edubot.student;
 
 import java.time.Clock;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ public class StudentService {
     private final EntitlementService entitlements;
     private final InviteService inviteService;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     public record GuardianInput(String fullName, String phone, GuardianRelation relation) {
     }
@@ -53,6 +56,24 @@ public class StudentService {
     public Student get(UUID id) {
         return students.findById(id)
                 .orElseThrow(() -> ApiException.notFound("STUDENT_NOT_FOUND", "Student not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, Student> findByIds(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return students.findByIds(ids).stream().collect(Collectors.toMap(Student::getId, Function.identity()));
+    }
+
+    /** Fails unless the student exists in the current center and is not archived. */
+    @Transactional(readOnly = true)
+    public Student requireActive(UUID id) {
+        Student student = get(id);
+        if (student.getStatus() != PersonStatus.ACTIVE) {
+            throw new ApiException(HttpStatus.CONFLICT, "STUDENT_ARCHIVED", "Student is archived");
+        }
+        return student;
     }
 
     @Transactional(readOnly = true)
@@ -90,6 +111,8 @@ public class StudentService {
         Student student = get(id);
         if (student.getStatus() == PersonStatus.ACTIVE) {
             student.archive(clock.instant());
+            // Groups end the student's active enrollments (same transaction).
+            events.publishEvent(new StudentArchivedEvent(student.getId()));
         }
         return student;
     }
