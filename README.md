@@ -11,14 +11,17 @@ Java 21 · Spring Boot 4 · Spring Security (JWT) · PostgreSQL 18 · Flyway · 
 ## Implemented so far
 
 - Telegram Mini App authentication: `initData` HMAC validation per the official Telegram procedure, freshness check, no auth bypass
-- JWT access tokens (identifiers only; memberships re-checked against the database)
-- Multi-center memberships with center selection (`/api/v1/auth/session`)
-- Core schema: users, centers, memberships, subscription plans and entitlements (Flyway)
+- JWT access tokens carry identifiers only; membership, role and permissions are re-read from the database on every request
+- Tenant context bound per request; Hibernate `@TenantId` infrastructure that fails closed
+- Platform onboarding: create a center with a trial subscription and a one-time owner invite
+- Invites: hashed one-time links, phone verified through Telegram's contact sharing in the bot
+- Telegram bot (long polling): `/start inv_<token>` → share contact → membership
+- Mini App skeleton (React + TypeScript + Tailwind): Telegram theme, auth bootstrap, center picker, platform centers screen, uz/ru i18n
 - RFC 9457 problem-detail errors, module boundary verification (Spring Modulith)
 
 ## Run locally
 
-Prerequisites: JDK 21, Docker Desktop, Git.
+Prerequisites: JDK 21, Docker Desktop, Git, Node.js LTS, cloudflared (for opening the Mini App from Telegram).
 
 ```bash
 cp .env.example .env          # then fill TELEGRAM_BOT_TOKEN, JWT_SECRET, DB_PASSWORD
@@ -32,10 +35,24 @@ cd backend && ./mvnw spring-boot:run
 
 Run the backend in Docker instead: `docker compose --profile app up -d --build`.
 
+### Open the Mini App in Telegram (local)
+
+Telegram only opens Mini Apps over HTTPS, so expose the Vite dev server through a tunnel:
+
+```bash
+cd web && npm install && npm run dev                 # http://localhost:5173, proxies /api to :8080
+cloudflared tunnel --url http://localhost:5173      # prints an https://*.trycloudflare.com URL
+```
+
+1. Put the tunnel URL into `.env` as `MINI_APP_URL` and restart the backend.
+2. In @BotFather: *Bot Settings → Menu Button* → set the same URL.
+3. Open the bot, press the menu button. Your Telegram id from `PLATFORM_ADMIN_TELEGRAM_IDS` gets the platform screen.
+
 ## Tests
 
 ```bash
 cd backend && ./mvnw verify   # unit + integration tests (needs Docker for Testcontainers)
+cd web && npm test            # frontend unit/component tests
 ```
 
 ## API (so far)
@@ -45,3 +62,8 @@ cd backend && ./mvnw verify   # unit + integration tests (needs Docker for Testc
 | POST | `/api/v1/auth/telegram` | – | Exchange Telegram `initData` for an access token |
 | POST | `/api/v1/auth/session` | Bearer | Bind the token to one of the user's memberships |
 | GET | `/api/v1/me` | Bearer | Current user, memberships, active membership |
+| POST/GET | `/api/v1/invites` | `INVITE_*` | Create / list pending invites of the current center |
+| DELETE | `/api/v1/invites/{id}` | `INVITE_*` | Revoke an invite |
+| POST/GET | `/api/v1/platform/centers` | `PLATFORM_MANAGE` | Create center (trial + owner invite) / list centers |
+| PATCH | `/api/v1/platform/centers/{id}/status` | `PLATFORM_MANAGE` | Activate / suspend / deactivate |
+| GET | `/api/v1/platform/plans` | `PLATFORM_MANAGE` | Subscription plans |
