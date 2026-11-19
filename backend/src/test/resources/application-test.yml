@@ -10,3 +10,5 @@ edubot:
     enabled: false
   app:
     public-url: https://app.example.test
+  scheduling:
+    enabled: false

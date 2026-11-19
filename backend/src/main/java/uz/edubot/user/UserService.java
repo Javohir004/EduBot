@@ -47,6 +47,18 @@ public class UserService {
                 .verifyPhone(normalizedPhone);
     }
 
+    /** The user pressed /start: the bot can message them again. */
+    @Transactional
+    public void markBotStarted(TelegramProfile profile) {
+        upsertFromTelegram(profile).changeBotBlocked(false);
+    }
+
+    /** The user blocked the bot: Telegram rejects messages until they press /start again. */
+    @Transactional
+    public void markBotBlocked(UUID userId, boolean blocked) {
+        repository.findById(userId).ifPresent(u -> u.changeBotBlocked(blocked));
+    }
+
     @Transactional(readOnly = true)
     public Optional<AppUser> findById(UUID id) {
         return repository.findById(id);

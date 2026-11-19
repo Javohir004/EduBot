@@ -30,6 +30,7 @@ import uz.edubot.common.error.ApiException;
 import uz.edubot.invite.AcceptedInvite;
 import uz.edubot.invite.InviteService;
 import uz.edubot.user.TelegramProfile;
+import uz.edubot.user.UserService;
 
 /**
  * Telegram adapter: parses updates and delegates to services. No business rules live here.
@@ -47,15 +48,17 @@ class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
     private final TelegramClient telegram;
     private final InviteService inviteService;
+    private final UserService userService;
     private final Clock clock;
     private final String miniAppUrl;
     /** chatId -> invite start parameter. In memory: after a restart the user just reopens the link. */
     private final Map<Long, PendingInvite> pendingInvites = new ConcurrentHashMap<>();
 
-    BotUpdateHandler(TelegramClient telegram, InviteService inviteService, Clock clock,
+    BotUpdateHandler(TelegramClient telegram, InviteService inviteService, UserService userService, Clock clock,
                      @Value("${edubot.app.public-url:}") String miniAppUrl) {
         this.telegram = telegram;
         this.inviteService = inviteService;
+        this.userService = userService;
         this.clock = clock;
         this.miniAppUrl = miniAppUrl;
     }
@@ -81,6 +84,7 @@ class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     }
 
     private void handleStart(Message message) {
+        userService.markBotStarted(profileOf(message.getFrom()));
         String[] parts = message.getText().strip().split("\\s+", 2);
         String parameter = parts.length > 1 ? parts[1] : "";
         if (parameter.startsWith(INVITE_PREFIX)) {
@@ -106,8 +110,7 @@ class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
             send(chatId, BotMessages.NO_PENDING_INVITE, removeKeyboard());
             return;
         }
-        TelegramProfile profile = new TelegramProfile(from.getId(), from.getFirstName(), from.getLastName(),
-                from.getUserName(), from.getLanguageCode());
+        TelegramProfile profile = profileOf(from);
         try {
             AcceptedInvite accepted = inviteService.accept(pending.startParameter(), profile, contact.getPhoneNumber());
             send(chatId, BotMessages.linked(accepted.centerName(), accepted.role()), removeKeyboard());
@@ -115,6 +118,11 @@ class BotUpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         } catch (ApiException e) {
             send(chatId, messageFor(e.getCode()), removeKeyboard());
         }
+    }
+
+    private static TelegramProfile profileOf(User from) {
+        return new TelegramProfile(from.getId(), from.getFirstName(), from.getLastName(), from.getUserName(),
+                from.getLanguageCode());
     }
 
     private static String messageFor(String code) {

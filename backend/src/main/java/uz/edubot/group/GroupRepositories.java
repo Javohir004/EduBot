@@ -34,12 +34,23 @@ interface StudyGroupRepository extends TenantScopedRepository<StudyGroup> {
     List<StudyGroup> findByIds(@Param("ids") Collection<UUID> ids);
 
     long countByStatus(GroupStatus status);
+
+    @Query("""
+            select g from StudyGroup g
+            where g.status = uz.edubot.group.GroupStatus.ACTIVE
+              and (:allTeachers = true or g.teacherId = :teacherId)
+            order by g.name
+            """)
+    List<StudyGroup> findActive(@Param("allTeachers") boolean allTeachers, @Param("teacherId") UUID teacherId);
 }
 
 interface GroupScheduleRepository extends TenantScopedRepository<GroupSchedule> {
 
     @Query("select s from GroupSchedule s where s.groupId = :groupId order by s.dayOfWeek, s.startTime")
     List<GroupSchedule> findByGroup(@Param("groupId") UUID groupId);
+
+    @Query("select s from GroupSchedule s where s.groupId in :groupIds and s.dayOfWeek = :day order by s.startTime")
+    List<GroupSchedule> findByGroupsAndDay(@Param("groupIds") Collection<UUID> groupIds, @Param("day") short day);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from GroupSchedule s where s.groupId = :groupId")
@@ -73,6 +84,13 @@ interface EnrollmentRepository extends TenantScopedRepository<Enrollment> {
               and e.status = uz.edubot.group.EnrollmentStatus.ACTIVE
             """)
     Optional<Enrollment> findActive(@Param("studentId") UUID studentId, @Param("groupId") UUID groupId);
+
+    /** Students who belonged to the group on the given date (including ones who left later). */
+    @Query("""
+            select e from Enrollment e
+            where e.groupId = :groupId and e.joinedOn <= :date and (e.leftOn is null or e.leftOn >= :date)
+            """)
+    List<Enrollment> findMembersOn(@Param("groupId") UUID groupId, @Param("date") java.time.LocalDate date);
 
     @Query("select e from Enrollment e where e.studentId = :studentId order by e.status, e.joinedOn desc")
     List<Enrollment> findByStudent(@Param("studentId") UUID studentId);

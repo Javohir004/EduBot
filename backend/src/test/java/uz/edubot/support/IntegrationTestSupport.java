@@ -29,7 +29,7 @@ import uz.edubot.user.TelegramProfile;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, FakeNotificationSender.Config.class})
 public abstract class IntegrationTestSupport {
 
     protected static final String BOT_TOKEN = "123456:TEST-ONLY-TOKEN";
@@ -46,7 +46,7 @@ public abstract class IntegrationTestSupport {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table group_schedule, enrollment, study_group, student_guardian, guardian, student, teacher, invite, center_membership, center_settings, subscription, "
+        jdbc.execute("truncate table notification, attendance, lesson, group_schedule, enrollment, study_group, student_guardian, guardian, student, teacher, invite, center_membership, center_settings, subscription, "
                 + "entitlement_override, education_center, app_user cascade");
     }
 

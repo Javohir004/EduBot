@@ -1,0 +1,21 @@
+package uz.edubot.notification;
+
+import java.util.Map;
+
+/** Message texts per notification type and language (uz default, ru). */
+final class NotificationTemplates {
+
+    private NotificationTemplates() {
+    }
+
+    static String render(NotificationType type, Map<String, Object> p, String languageCode) {
+        boolean ru = languageCode != null && languageCode.toLowerCase().startsWith("ru");
+        return switch (type) {
+            case ABSENCE -> ru
+                    ? "🔴 %s не пришёл(ла) на занятие «%s» %s в %s.\n%s".formatted(
+                            p.get("studentName"), p.get("groupName"), p.get("date"), p.get("time"), p.get("centerName"))
+                    : "🔴 %s %s kuni soat %s dagi «%s» darsiga kelmadi.\n%s".formatted(
+                            p.get("studentName"), p.get("date"), p.get("time"), p.get("groupName"), p.get("centerName"));
+        };
+    }
+}

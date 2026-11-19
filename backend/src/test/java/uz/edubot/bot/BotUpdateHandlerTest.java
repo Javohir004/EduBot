@@ -26,6 +26,7 @@ import uz.edubot.center.MembershipRole;
 import uz.edubot.invite.AcceptedInvite;
 import uz.edubot.invite.InviteService;
 import uz.edubot.user.TelegramProfile;
+import uz.edubot.user.UserService;
 
 class BotUpdateHandlerTest {
 
@@ -33,7 +34,7 @@ class BotUpdateHandlerTest {
 
     private final TelegramClient telegram = mock(TelegramClient.class);
     private final InviteService inviteService = mock(InviteService.class);
-    private final BotUpdateHandler handler = new BotUpdateHandler(telegram, inviteService,
+    private final BotUpdateHandler handler = new BotUpdateHandler(telegram, inviteService, mock(UserService.class),
             Clock.fixed(Instant.parse("2026-11-19T10:00:00Z"), ZoneOffset.UTC), "https://app.example.test");
 
     @Test

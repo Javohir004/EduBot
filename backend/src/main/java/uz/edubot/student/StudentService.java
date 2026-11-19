@@ -66,6 +66,16 @@ public class StudentService {
         return students.findByIds(ids).stream().collect(Collectors.toMap(Student::getId, Function.identity()));
     }
 
+    /** Telegram user ids of guardians who use the app, per student. */
+    @Transactional(readOnly = true)
+    public Map<UUID, List<UUID>> guardianUserIds(Collection<UUID> studentIds) {
+        if (studentIds.isEmpty()) {
+            return Map.of();
+        }
+        return links.findGuardianUsers(studentIds).stream().collect(Collectors.groupingBy(
+                row -> (UUID) row[0], Collectors.mapping(row -> (UUID) row[1], Collectors.toList())));
+    }
+
     /** Fails unless the student exists in the current center and is not archived. */
     @Transactional(readOnly = true)
     public Student requireActive(UUID id) {

@@ -50,6 +50,14 @@ interface GuardianRepository extends TenantScopedRepository<Guardian> {
 
 interface StudentGuardianRepository extends JpaRepository<StudentGuardian, StudentGuardian.Key> {
 
+    /** [studentId, guardian userId] pairs for guardians who use the app. */
+    @Query("""
+            select sg.studentId, g.userId from StudentGuardian sg
+            join Guardian g on g.id = sg.guardianId
+            where sg.studentId in :studentIds and g.userId is not null
+            """)
+    List<Object[]> findGuardianUsers(@Param("studentIds") Collection<UUID> studentIds);
+
     @Query("select sg from StudentGuardian sg where sg.studentId = :studentId order by sg.createdAt")
     List<StudentGuardian> findByStudent(@Param("studentId") UUID studentId);
 

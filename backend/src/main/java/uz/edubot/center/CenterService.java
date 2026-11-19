@@ -32,6 +32,12 @@ public class CenterService {
     }
 
     @Transactional(readOnly = true)
+    public CenterSettings settings(UUID centerId) {
+        return settings.findById(centerId)
+                .orElseThrow(() -> new IllegalStateException("Center without settings: " + centerId));
+    }
+
+    @Transactional(readOnly = true)
     public Page<EducationCenter> findAll(Pageable pageable) {
         return centers.findAll(pageable);
     }

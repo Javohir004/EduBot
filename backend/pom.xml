@@ -21,6 +21,7 @@
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <springdoc.version>3.2.0</springdoc.version>
         <telegrambots.version>10.3.0</telegrambots.version>
+        <shedlock.version>7.11.0</shedlock.version>
     </properties>
 
     <dependencies>
@@ -88,6 +89,18 @@
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-client</artifactId>
             <version>${telegrambots.version}</version>
+        </dependency>
+
+        <!-- Scheduled jobs run once even if two instances are started -->
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
 
         <!-- Annotations only (module metadata); verification runs in tests -->

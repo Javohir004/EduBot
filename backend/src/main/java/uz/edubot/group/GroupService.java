@@ -68,6 +68,23 @@ public class GroupService {
         return group;
     }
 
+    /** Active groups visible to the member (all for staff, own for teachers). */
+    @Transactional(readOnly = true)
+    public List<StudyGroup> activeGroupsFor(CurrentMember member) {
+        boolean all = member.has(Permission.GROUP_WRITE);
+        return groups.findActive(all, all ? NO_TEACHER : ownTeacherId(member));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupSchedule> slotsOn(Collection<UUID> groupIds, java.time.DayOfWeek day) {
+        return groupIds.isEmpty() ? List.of() : schedules.findByGroupsAndDay(groupIds, (short) day.getValue());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Enrollment> membersOn(UUID groupId, LocalDate date) {
+        return enrollments.findMembersOn(groupId, date);
+    }
+
     @Transactional(readOnly = true)
     public List<GroupSchedule> scheduleOf(UUID groupId) {
         return schedules.findByGroup(groupId);

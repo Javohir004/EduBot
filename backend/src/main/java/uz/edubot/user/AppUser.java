@@ -65,6 +65,10 @@ public class AppUser {
         this.verifiedPhone = normalizedPhone;
     }
 
+    void changeBotBlocked(boolean blocked) {
+        this.botBlocked = blocked;
+    }
+
     void changePlatformRole(PlatformRole platformRole) {
         this.platformRole = platformRole;
     }

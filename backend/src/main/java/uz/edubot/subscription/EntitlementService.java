@@ -36,6 +36,23 @@ public class EntitlementService {
         }
     }
 
+    /** Feature flags are stored as 0/1; no current subscription means "off". */
+    @Transactional(readOnly = true)
+    public boolean isEnabled(UUID centerId, EntitlementKey key) {
+        @SuppressWarnings("unchecked")
+        List<Number> rows = entityManager.createNativeQuery("""
+                        select coalesce(o.value, e.value, 0)
+                        from subscription s
+                        left join plan_entitlement e on e.plan_id = s.plan_id and e.entitlement_key = :key
+                        left join entitlement_override o on o.center_id = s.center_id and o.entitlement_key = :key
+                        where s.center_id = :centerId and s.status in ('TRIAL', 'ACTIVE')
+                        """)
+                .setParameter("key", key.name())
+                .setParameter("centerId", centerId)
+                .getResultList();
+        return !rows.isEmpty() && rows.getFirst().longValue() > 0;
+    }
+
     private long lockedLimit(UUID centerId, EntitlementKey key) {
         @SuppressWarnings("unchecked")
         List<Number> rows = entityManager.createNativeQuery("""
