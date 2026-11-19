@@ -25,12 +25,13 @@ export function Section({ children, className = '' }: { children: ReactNode; cla
   return <section className={`rounded-2xl bg-section p-4 shadow-sm ${className}`}>{children}</section>
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 const buttonStyles: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-accent-text',
   secondary: 'bg-surface text-text',
   ghost: 'bg-transparent text-link',
+  danger: 'bg-surface text-danger',
 }
 
 export function Button({

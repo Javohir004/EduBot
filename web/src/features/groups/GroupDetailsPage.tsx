@@ -122,7 +122,7 @@ function GroupView({ group }: { group: GroupDetails }) {
 
       {error && <p className="text-sm text-danger">{errorMessage(error)}</p>}
       {canEdit && (
-        <Button variant="secondary" className="text-danger" loading={complete.isPending} onClick={() => void finish()}>
+        <Button variant="danger" loading={complete.isPending} onClick={() => void finish()}>
           {t('groups.complete')}
         </Button>
       )}

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import type { PersonStatus } from '../../shared/api/types'
 import { useDebounced } from '../../shared/hooks/useDebounced'
 import { useErrorMessage } from '../../shared/i18n'
+import { formatPhone } from '../../shared/lib/format'
 import { Button, EmptyState, ListRow, Loading, Screen, SearchInput, Section, Segmented } from '../../shared/ui/ui'
 import { useStudents } from './api'
 
@@ -64,7 +65,7 @@ export function StudentsPage() {
               <ListRow
                 key={s.id}
                 title={`${s.lastName} ${s.firstName}`}
-                subtitle={s.phone ?? t('people.noPhone')}
+                subtitle={s.phone ? formatPhone(s.phone) : t('people.noPhone')}
                 onClick={() => navigate(`/students/${s.id}`)}
               />
             ))}

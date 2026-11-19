@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     // Same-origin API in development too: no CORS configuration needed on the backend.
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:8080',
     },
     // Allows opening the dev server through an HTTPS tunnel (required by Telegram Mini Apps).
     allowedHosts: true,

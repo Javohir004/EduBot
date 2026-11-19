@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import type { AttendanceStatus } from '../../shared/api/types'
 import { useErrorMessage } from '../../shared/i18n'
+import { formatMonth } from '../../shared/lib/format'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { Button, EmptyState, Loading, Screen, Section } from '../../shared/ui/ui'
 import { todayIso, useAttendanceHistory } from './api'
@@ -27,8 +28,7 @@ export function AttendanceHistoryPage() {
   const errorMessage = useErrorMessage()
   const [month, setMonth] = useState(todayIso().slice(0, 7))
   const history = useAttendanceHistory(id, month)
-  const monthLabel = new Intl.DateTimeFormat(i18n.language === 'ru' ? 'ru-RU' : 'uz-UZ', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-    .format(new Date(`${month}-01T00:00:00Z`))
+  const monthLabel = formatMonth(`${month}-01`, i18n.language)
 
   return (
     <Screen title={t('attendance.historyTitle')}>

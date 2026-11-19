@@ -4,17 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../app/auth-context'
 import type { ChargeDto, PaymentDto, PaymentMethod } from '../../shared/api/types'
 import { useErrorMessage } from '../../shared/i18n'
-import { formatDate, formatMoney } from '../../shared/lib/format'
+import { formatDate, formatMoney, formatMonth } from '../../shared/lib/format'
 import { haptic } from '../../shared/telegram/telegram'
 import { Badge, Button, Field, Loading, Section } from '../../shared/ui/ui'
 import { METHODS, newIdempotencyKey, useBalance, useRecordPayment, useVoidPayment } from './api'
 
 const CHARGE_TONE = { PAID: 'good', PARTIAL: 'warn', UNPAID: 'bad', VOID: 'neutral' } as const
-
-function monthLabel(iso: string, language: string): string {
-  return new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'uz-UZ', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-    .format(new Date(`${iso}T00:00:00Z`))
-}
 
 /** Balance block on the student profile: debt, payment form, charges and payment history. */
 export function StudentBalance({ studentId, archived }: { studentId: string; archived: boolean }) {
@@ -66,7 +61,7 @@ function ChargeRow({ charge }: { charge: ChargeDto }) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
       <span className="min-w-0">
-        <span className="block font-medium capitalize">{monthLabel(charge.periodStart, i18n.language)}</span>
+        <span className="block font-medium capitalize">{formatMonth(charge.periodStart, i18n.language)}</span>
         <span className="block truncate text-sm text-hint">{charge.groupName}</span>
       </span>
       <span className="flex flex-col items-end gap-1">

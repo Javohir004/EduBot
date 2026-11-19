@@ -50,6 +50,25 @@ cloudflared tunnel --url http://localhost:5173      # prints an https://*.tryclo
 2. In @BotFather: *Bot Settings → Menu Button* → set the same URL.
 3. Open the bot, press the menu button. Your Telegram id from `PLATFORM_ADMIN_TELEGRAM_IDS` gets the platform screen.
 
+### Demo data
+
+Start the backend with the `demo` profile to get a clearly named demo center
+("EduBot Demo Markazi": 24 students, 4 groups, 2 weeks of attendance, payments).
+Phones are fictional and guardians are not linked, so nobody receives messages.
+
+```bash
+SPRING_PROFILES_ACTIVE=demo DEMO_OWNER_TELEGRAM_ID=<your telegram id> ./mvnw spring-boot:run
+```
+
+### Open the Mini App in a normal browser (development)
+
+There is no auth bypass. `web/scripts/dev-init-data.mjs` signs initData exactly like Telegram,
+using the dev bot token from `.env`, and prints a URL that `telegram-web-app.js` understands:
+
+```bash
+cd web && node scripts/dev-init-data.mjs <telegramUserId> [firstName] [baseUrl]
+```
+
 ## Tests
 
 ```bash
@@ -93,3 +112,5 @@ cd web && npm test            # frontend unit/component tests
 | GET/PUT | `/api/v1/center/settings` | `CENTER_*` | Notification toggles, payment due day |
 | GET/DELETE | `/api/v1/staff[/{membershipId}]` | `STAFF_MANAGE` | Staff list, revoke access |
 | GET | `/api/v1/parent/children[/{id}]` | `CHILD_READ` | Parent view: own children, attendance, debt |
+| GET | `/api/v1/dashboard/summary` | `STUDENT_READ` | Key figures (revenue for owners, debt for payment readers) |
+| GET | `/api/v1/activity` | `PAYMENT_READ` | Latest students, payments and voids |

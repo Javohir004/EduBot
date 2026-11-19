@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useAuth } from '../../app/auth-context'
 import { Screen, Section } from '../../shared/ui/ui'
 import { TodayLessons } from '../attendance/TodayLessons'
+import { ActivityFeed, DashboardTiles } from './Dashboard'
 import { ParentChildren } from '../parent/ParentPages'
 import { SubscriptionBanner } from '../settings/SubscriptionBanner'
 
@@ -12,6 +13,7 @@ export function HomePage() {
   const otherMemberships = me.memberships.filter((m) => m.id !== activeMembership?.id)
   const role = activeMembership?.role
   const marksAttendance = role === 'OWNER' || role === 'ADMIN' || role === 'TEACHER'
+  const managesCenter = role === 'OWNER' || role === 'ADMIN'
 
   return (
     <Screen>
@@ -26,6 +28,8 @@ export function HomePage() {
 
       {(role === 'OWNER' || role === 'ADMIN' || role === 'TEACHER') && <SubscriptionBanner />}
 
+      {managesCenter && <DashboardTiles />}
+
       {marksAttendance ? (
         <TodayLessons />
       ) : role === 'PARENT' ? (
@@ -35,6 +39,8 @@ export function HomePage() {
           <p className="text-[15px] leading-relaxed text-hint">{t('home.inProgress')}</p>
         </Section>
       )}
+
+      {managesCenter && <ActivityFeed />}
 
       {role === 'OWNER' && (
         <Link to="/settings" className="block">

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import type { GuardianRelation, InviteLink, StudentDetails } from '../../shared/api/types'
 import { useErrorMessage } from '../../shared/i18n'
-import { formatDate } from '../../shared/lib/format'
+import { formatDate, formatPhone } from '../../shared/lib/format'
 import { confirmAction, haptic } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { InviteLinkCard } from '../../shared/ui/InviteLinkCard'
@@ -58,15 +58,12 @@ function StudentDetailsView({ student, t }: { student: StudentDetails; t: Return
       {archived && <Badge tone="warn">{t('people.archivedBadge')}</Badge>}
 
       <Section className="divide-y divide-separator p-0">
-        <ListRow title={t('people.phone')} subtitle={student.phone ?? t('people.noPhone')}
+        <ListRow title={t('people.phone')} subtitle={student.phone ? formatPhone(student.phone) : t('people.noPhone')}
           trailing={student.phone && <a className="text-link" href={`tel:${student.phone}`}>{t('people.call')}</a>} />
         {student.birthDate && <ListRow title={t('students.birthDate')} subtitle={formatDate(`${student.birthDate}T12:00:00Z`)} />}
         {student.note && <ListRow title={t('students.note')} subtitle={student.note} />}
       </Section>
 
-      <StudentGroups studentId={student.id} />
-
-      <StudentBalance studentId={student.id} archived={archived} />
 
       {invite && (
         <InviteLinkCard title={t('people.inviteTitle')} text={t('people.inviteText')} link={invite.link}
@@ -95,7 +92,7 @@ function StudentDetailsView({ student, t }: { student: StudentDetails; t: Return
                   <span className="min-w-0">
                     <span className="block font-medium">{g.fullName}</span>
                     <span className="block text-sm text-hint">
-                      {t(`students.relations.${g.relation}`)} · <a className="text-link" href={`tel:${g.phone}`}>{g.phone}</a>
+                      {t(`students.relations.${g.relation}`)} · <a className="text-link" href={`tel:${g.phone}`}>{formatPhone(g.phone)}</a>
                     </span>
                   </span>
                   <Badge tone={g.linked ? 'good' : 'neutral'}>{g.linked ? t('people.usesApp') : t('people.notInApp')}</Badge>
@@ -119,10 +116,13 @@ function StudentDetailsView({ student, t }: { student: StudentDetails; t: Return
         )
       )}
 
+      <StudentGroups studentId={student.id} />
+
+      <StudentBalance studentId={student.id} archived={archived} />
+
       {error && <p className="text-sm text-danger">{errorMessage(error)}</p>}
 
-      <Button variant="secondary" loading={setArchived.isPending} onClick={() => void toggleArchive()}
-        className={archived ? '' : 'text-danger'}>
+      <Button variant={archived ? 'secondary' : 'danger'} loading={setArchived.isPending} onClick={() => void toggleArchive()}>
         {archived ? t('people.restore') : t('people.archive')}
       </Button>
     </Screen>

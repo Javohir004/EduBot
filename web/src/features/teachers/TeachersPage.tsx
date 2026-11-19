@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import type { PersonStatus } from '../../shared/api/types'
 import { useDebounced } from '../../shared/hooks/useDebounced'
 import { useErrorMessage } from '../../shared/i18n'
+import { formatPhone } from '../../shared/lib/format'
 import { Badge, Button, EmptyState, ListRow, Loading, Screen, SearchInput, Section, Segmented } from '../../shared/ui/ui'
 import { useTeachers } from './api'
 
@@ -62,7 +63,7 @@ export function TeachersPage() {
               <ListRow
                 key={teacher.id}
                 title={teacher.fullName}
-                subtitle={teacher.subjects ?? teacher.phone ?? t('people.noPhone')}
+                subtitle={teacher.subjects ?? (teacher.phone ? formatPhone(teacher.phone) : t('people.noPhone'))}
                 trailing={teacher.linked ? <Badge tone="good">{t('people.usesApp')}</Badge> : undefined}
                 onClick={() => navigate(`/teachers/${teacher.id}`)}
               />

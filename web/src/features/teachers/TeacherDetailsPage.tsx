@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import type { InviteLink } from '../../shared/api/types'
 import { useErrorMessage } from '../../shared/i18n'
+import { formatPhone } from '../../shared/lib/format'
 import { confirmAction, haptic } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { InviteLinkCard } from '../../shared/ui/InviteLinkCard'
@@ -46,7 +47,7 @@ export function TeacherDetailsPage() {
       </div>
 
       <Section className="divide-y divide-separator p-0">
-        <ListRow title={t('people.phone')} subtitle={data.phone ?? t('people.noPhone')}
+        <ListRow title={t('people.phone')} subtitle={data.phone ? formatPhone(data.phone) : t('people.noPhone')}
           trailing={data.phone && <a className="text-link" href={`tel:${data.phone}`}>{t('people.call')}</a>} />
         {data.subjects && <ListRow title={t('teachers.subjects')} subtitle={data.subjects} />}
       </Section>
@@ -66,8 +67,7 @@ export function TeacherDetailsPage() {
 
       {error && <p className="text-sm text-danger">{errorMessage(error)}</p>}
 
-      <Button variant="secondary" loading={setArchived.isPending} onClick={() => void toggleArchive()}
-        className={archived ? '' : 'text-danger'}>
+      <Button variant={archived ? 'secondary' : 'danger'} loading={setArchived.isPending} onClick={() => void toggleArchive()}>
         {archived ? t('people.restore') : t('people.archive')}
       </Button>
     </Screen>
