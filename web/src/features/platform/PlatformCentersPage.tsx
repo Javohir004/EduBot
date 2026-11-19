@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import type { CenterSummary, CreatedCenterResponse } from '../../shared/api/types'
 import { useErrorMessage } from '../../shared/i18n'
 import { formatDate } from '../../shared/lib/format'
-import { shareLink } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { useAuth } from '../../app/auth-context'
+import { InviteLinkCard } from '../../shared/ui/InviteLinkCard'
 import { Badge, Button, EmptyState, Screen, Section, Spinner } from '../../shared/ui/ui'
 import { useCenters } from './api'
 import { CreateCenterForm } from './CreateCenterForm'
@@ -42,7 +42,15 @@ export function PlatformCentersPage() {
         />
       )}
 
-      {created && <InviteResult result={created} onDone={() => setCreated(null)} />}
+      {created && (
+        <InviteLinkCard
+          title={t('platform.inviteTitle')}
+          text={t('platform.inviteText')}
+          link={created.ownerInvite.link}
+          shareText={`${t('platform.inviteShareText')}: ${created.center.name}`}
+          onDone={() => setCreated(null)}
+        />
+      )}
 
       {centers.isPending && (
         <div className="flex justify-center py-10">
@@ -94,35 +102,5 @@ function CenterRow({ center }: { center: CenterSummary }) {
       </div>
       <Badge tone={statusTone}>{t(`platform.status.${center.status}`)}</Badge>
     </div>
-  )
-}
-
-function InviteResult({ result, onDone }: { result: CreatedCenterResponse; onDone(): void }) {
-  const { t } = useTranslation()
-  const [copied, setCopied] = useState(false)
-  const link = result.ownerInvite.link
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(link)
-    setCopied(true)
-  }
-
-  return (
-    <Section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">✅ {t('platform.inviteTitle')}</h2>
-      <p className="text-[15px] text-hint">{t('platform.inviteText')}</p>
-      <p className="rounded-xl bg-surface px-3 py-2.5 font-mono text-sm break-all">{link}</p>
-      <div className="flex flex-col gap-2">
-        <Button onClick={() => shareLink(link, `${t('platform.inviteShareText')}: ${result.center.name}`)}>
-          {t('common.share')}
-        </Button>
-        <Button variant="secondary" onClick={() => void copy()}>
-          {copied ? t('common.copied') : t('common.copy')}
-        </Button>
-        <Button variant="ghost" onClick={onDone}>
-          {t('common.done')}
-        </Button>
-      </div>
-    </Section>
   )
 }

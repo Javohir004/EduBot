@@ -5,10 +5,17 @@ import { HomePage } from '../features/home/HomePage'
 import { CenterPickerPage } from '../features/onboarding/CenterPickerPage'
 import { NoCenterPage } from '../features/onboarding/NoCenterPage'
 import { PlatformCentersPage } from '../features/platform/PlatformCentersPage'
+import { StudentDetailsPage } from '../features/students/StudentDetailsPage'
+import { StudentFormPage } from '../features/students/StudentFormPage'
+import { StudentsPage } from '../features/students/StudentsPage'
+import { TeacherDetailsPage } from '../features/teachers/TeacherDetailsPage'
+import { TeacherFormPage } from '../features/teachers/TeacherFormPage'
+import { TeachersPage } from '../features/teachers/TeachersPage'
 import { ApiError } from '../shared/api/client'
 import { FullScreenMessage, Spinner } from '../shared/ui/ui'
 import { AuthProvider } from './auth'
 import { useAuth } from './auth-context'
+import { TabLayout } from './TabLayout'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,10 +64,25 @@ function AppRoutes() {
   if (!activeMembership && !isPlatformAdmin) {
     return <NoCenterPage />
   }
+  const managesPeople = activeMembership?.role === 'OWNER' || activeMembership?.role === 'ADMIN'
   return (
     <Routes>
-      <Route path="/" element={activeMembership ? <HomePage /> : <Navigate to="/platform" replace />} />
-      {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
+      <Route element={<TabLayout />}>
+        <Route path="/" element={activeMembership ? <HomePage /> : <Navigate to="/platform" replace />} />
+        {managesPeople && <Route path="/students" element={<StudentsPage />} />}
+        {managesPeople && <Route path="/teachers" element={<TeachersPage />} />}
+        {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
+      </Route>
+      {managesPeople && (
+        <>
+          <Route path="/students/new" element={<StudentFormPage />} />
+          <Route path="/students/:id" element={<StudentDetailsPage />} />
+          <Route path="/students/:id/edit" element={<StudentFormPage />} />
+          <Route path="/teachers/new" element={<TeacherFormPage />} />
+          <Route path="/teachers/:id" element={<TeacherDetailsPage />} />
+          <Route path="/teachers/:id/edit" element={<TeacherFormPage />} />
+        </>
+      )}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

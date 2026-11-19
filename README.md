@@ -16,7 +16,8 @@ Java 21 · Spring Boot 4 · Spring Security (JWT) · PostgreSQL 18 · Flyway · 
 - Platform onboarding: create a center with a trial subscription and a one-time owner invite
 - Invites: hashed one-time links, phone verified through Telegram's contact sharing in the bot
 - Telegram bot (long polling): `/start inv_<token>` → share contact → membership
-- Mini App skeleton (React + TypeScript + Tailwind): Telegram theme, auth bootstrap, center picker, platform centers screen, uz/ru i18n
+- Students, guardians (shared by siblings) and teachers: search, archive, optimistic locking, plan limits
+- Mini App (React + TypeScript + Tailwind): Telegram theme, tab bar, students/teachers screens, platform centers screen, uz/ru i18n
 - RFC 9457 problem-detail errors, module boundary verification (Spring Modulith)
 
 ## Run locally
@@ -67,3 +68,8 @@ cd web && npm test            # frontend unit/component tests
 | POST/GET | `/api/v1/platform/centers` | `PLATFORM_MANAGE` | Create center (trial + owner invite) / list centers |
 | PATCH | `/api/v1/platform/centers/{id}/status` | `PLATFORM_MANAGE` | Activate / suspend / deactivate |
 | GET | `/api/v1/platform/plans` | `PLATFORM_MANAGE` | Subscription plans |
+| GET/POST/PUT | `/api/v1/students[/{id}]` | `STUDENT_*` | Search, create (with guardians), update with `version` |
+| POST | `/api/v1/students/{id}/archive` · `/restore` | `STUDENT_WRITE` | Archive instead of delete |
+| POST/DELETE | `/api/v1/students/{id}/guardians[/{gid}]` | `STUDENT_WRITE` | Link / unlink a guardian (shared by phone) |
+| POST | `/api/v1/students/{id}/guardians/{gid}/invite` | `INVITE_STAFF` | One-time parent invite link |
+| GET/POST/PUT | `/api/v1/teachers[/{id}]` | `TEACHER_MANAGE` | Teachers; `/archive`, `/restore`, `/invite` |

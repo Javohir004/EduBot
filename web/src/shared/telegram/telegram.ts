@@ -21,6 +21,7 @@ export interface TelegramWebApp {
   BackButton: BackButton
   HapticFeedback?: { notificationOccurred(type: HapticNotification): void }
   openTelegramLink(url: string): void
+  showConfirm?(message: string, callback: (confirmed: boolean) => void): void
 }
 
 declare global {
@@ -45,6 +46,15 @@ export function haptic(type: HapticNotification): void {
 export function telegramLanguage(): 'uz' | 'ru' {
   const code = getWebApp()?.initDataUnsafe.user?.language_code ?? navigator.language
   return code?.toLowerCase().startsWith('ru') ? 'ru' : 'uz'
+}
+
+/** Native Telegram confirmation dialog for destructive actions (browser confirm as fallback). */
+export function confirmAction(message: string): Promise<boolean> {
+  const webApp = getWebApp()
+  if (webApp?.showConfirm) {
+    return new Promise((resolve) => webApp.showConfirm!(message, resolve))
+  }
+  return Promise.resolve(window.confirm(message))
 }
 
 /** Opens Telegram's share sheet for a link (falls back to a new tab outside Telegram). */

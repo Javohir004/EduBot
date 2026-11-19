@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react'
 import { useId } from 'react'
 
 export function Screen({ title, children, action }: { title?: string; children: ReactNode; action?: ReactNode }) {
@@ -146,4 +152,98 @@ export function Badge({ children, tone = 'neutral' }: { children: ReactNode; ton
     bad: 'bg-red-500/15 text-red-700 dark:text-red-400',
   }
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>{children}</span>
+}
+
+export function SearchInput({ value, onChange, placeholder }: { value: string; onChange(v: string): void; placeholder: string }) {
+  return (
+    <input
+      type="search"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="min-h-11 w-full rounded-xl bg-section px-4 text-[16px] text-text shadow-sm outline-none placeholder:text-hint"
+    />
+  )
+}
+
+export function Segmented<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T
+  options: { value: T; label: string }[]
+  onChange(value: T): void
+}) {
+  return (
+    <div className="flex rounded-xl bg-section p-1 shadow-sm" role="tablist">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="tab"
+          aria-selected={o.value === value}
+          onClick={() => onChange(o.value)}
+          className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition ${o.value === value ? 'bg-accent text-accent-text' : 'text-hint'}`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function ListRow({
+  title,
+  subtitle,
+  trailing,
+  onClick,
+}: {
+  title: ReactNode
+  subtitle?: ReactNode
+  trailing?: ReactNode
+  onClick?(): void
+}) {
+  const content = (
+    <>
+      <span className="min-w-0">
+        <span className="block truncate font-medium">{title}</span>
+        {subtitle && <span className="block truncate text-sm text-hint">{subtitle}</span>}
+      </span>
+      {trailing ?? (onClick && <span className="text-hint">›</span>)}
+    </>
+  )
+  const className = 'flex w-full items-center justify-between gap-3 px-4 py-3 text-left'
+  return onClick ? (
+    <button type="button" onClick={onClick} className={`${className} active:bg-surface`}>
+      {content}
+    </button>
+  ) : (
+    <div className={className}>{content}</div>
+  )
+}
+
+export function TextArea({ label, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string }) {
+  const id = useId()
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-medium text-hint">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        {...props}
+        rows={3}
+        className="rounded-xl border border-separator bg-bg px-3 py-2 text-[16px] text-text outline-none focus:border-accent"
+      />
+    </div>
+  )
+}
+
+export function Loading() {
+  return (
+    <div className="flex justify-center py-10">
+      <Spinner />
+    </div>
+  )
 }

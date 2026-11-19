@@ -62,3 +62,52 @@ export interface PlanResponse {
   monthlyPrice: number
   currency: string
 }
+
+export type PersonStatus = 'ACTIVE' | 'ARCHIVED'
+export type GuardianRelation = 'MOTHER' | 'FATHER' | 'GUARDIAN' | 'OTHER'
+
+export interface StudentSummary {
+  id: string
+  firstName: string
+  lastName: string
+  phone: string | null
+  status: PersonStatus
+}
+
+export interface GuardianDto {
+  id: string
+  fullName: string
+  phone: string
+  relation: GuardianRelation
+  linked: boolean
+}
+
+export interface StudentDetails extends StudentSummary {
+  birthDate: string | null
+  note: string | null
+  version: number
+  guardians: GuardianDto[]
+}
+
+export interface StudentFields {
+  firstName: string
+  lastName: string
+  birthDate?: string | null
+  phone?: string | null
+  note?: string | null
+}
+
+export interface TeacherDto {
+  id: string
+  fullName: string
+  phone: string | null
+  subjects: string | null
+  status: PersonStatus
+  linked: boolean
+  version: number
+}
+
+export interface InviteLink {
+  link: string
+  expiresAt: string
+}
