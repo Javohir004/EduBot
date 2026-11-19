@@ -1,0 +1,34 @@
+# Local development stack.
+#   docker compose up -d                 -> PostgreSQL only (run the backend from the IDE)
+#   docker compose --profile app up -d   -> PostgreSQL + backend container
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: edubot
+      POSTGRES_USER: ${DB_USER:-edubot}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d edubot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    profiles: ["app"]
+    build: ./backend
+    env_file: .env
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/edubot
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
