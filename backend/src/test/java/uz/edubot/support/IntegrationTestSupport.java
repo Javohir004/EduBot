@@ -46,7 +46,7 @@ public abstract class IntegrationTestSupport {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table notification, attendance, lesson, group_schedule, enrollment, study_group, student_guardian, guardian, student, teacher, invite, center_membership, center_settings, subscription, "
+        jdbc.execute("truncate table audit_log, payment_allocation, payment, tuition_charge, notification, attendance, lesson, group_schedule, enrollment, study_group, student_guardian, guardian, student, teacher, invite, center_membership, center_settings, subscription, "
                 + "entitlement_override, education_center, app_user cascade");
     }
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ public class GroupService {
     private final StudentService studentService;
     private final EntitlementService entitlements;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     public record Slot(java.time.DayOfWeek day, java.time.LocalTime start, java.time.LocalTime end, String room) {
     }
@@ -185,7 +187,12 @@ public class GroupService {
             throw new ApiException(HttpStatus.CONFLICT, "GROUP_FULL", "The group is full");
         }
         LocalDate joined = joinedOn == null ? BusinessTime.today(clock) : joinedOn;
-        return enrollments.save(new Enrollment(studentId, groupId, joined, feeOverride));
+        if (joined.isAfter(BusinessTime.today(clock).plusMonths(1))) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_DATE", "Join date is too far in the future");
+        }
+        Enrollment enrollment = enrollments.saveAndFlush(new Enrollment(studentId, groupId, joined, feeOverride));
+        events.publishEvent(new EnrollmentStartedEvent(enrollment.getId(), studentId, groupId, joined));
+        return enrollment;
     }
 
     @Transactional
