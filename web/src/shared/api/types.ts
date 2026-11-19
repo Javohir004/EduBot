@@ -111,3 +111,53 @@ export interface InviteLink {
   link: string
   expiresAt: string
 }
+
+export type GroupStatus = 'ACTIVE' | 'COMPLETED'
+export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
+
+export interface Slot {
+  day: DayOfWeek
+  startTime: string
+  endTime: string
+  room?: string | null
+}
+
+export interface GroupSummary {
+  id: string
+  name: string
+  subject: string | null
+  teacherName: string | null
+  monthlyFee: number
+  status: GroupStatus
+  studentCount: number
+  capacity: number | null
+}
+
+export interface GroupDetails extends GroupSummary {
+  teacherId: string | null
+  startDate: string
+  endDate: string | null
+  version: number
+  schedule: Slot[]
+}
+
+export interface GroupMember {
+  enrollmentId: string
+  studentId: string
+  firstName: string
+  lastName: string
+  phone: string | null
+  joinedOn: string
+  feeOverride: number | null
+}
+
+export interface EnrollmentDto {
+  id: string
+  studentId: string
+  groupId: string
+  groupName: string | null
+  joinedOn: string
+  leftOn: string | null
+  status: 'ACTIVE' | 'ENDED'
+  feeOverride: number | null
+}

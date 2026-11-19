@@ -8,6 +8,7 @@ import { formatDate } from '../../shared/lib/format'
 import { confirmAction, haptic } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { InviteLinkCard } from '../../shared/ui/InviteLinkCard'
+import { useStudentEnrollments } from '../groups/api'
 import { Badge, Button, EmptyState, Field, ListRow, Loading, Screen, Section, SelectField } from '../../shared/ui/ui'
 import { RELATIONS, useAddGuardian, useInviteGuardian, useRemoveGuardian, useSetStudentArchived, useStudent } from './api'
 
@@ -61,6 +62,8 @@ function StudentDetailsView({ student, t }: { student: StudentDetails; t: Return
         {student.birthDate && <ListRow title={t('students.birthDate')} subtitle={formatDate(`${student.birthDate}T12:00:00Z`)} />}
         {student.note && <ListRow title={t('students.note')} subtitle={student.note} />}
       </Section>
+
+      <StudentGroups studentId={student.id} />
 
       {invite && (
         <InviteLinkCard title={t('people.inviteTitle')} text={t('people.inviteText')} link={invite.link}
@@ -155,5 +158,29 @@ function AddGuardianForm({ studentId, onDone }: { studentId: string; onDone(): v
         </div>
       </form>
     </Section>
+  )
+}
+
+function StudentGroups({ studentId }: { studentId: string }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const enrollments = useStudentEnrollments(studentId)
+  const active = enrollments.data?.filter((e) => e.status === 'ACTIVE') ?? []
+  if (enrollments.isPending) return null
+  return (
+    <>
+      <h2 className="font-semibold">{t('groups.studentGroups')}</h2>
+      {active.length === 0 ? (
+        <EmptyState title={t('groups.noStudentGroups')} />
+      ) : (
+        <Section className="divide-y divide-separator p-0">
+          {active.map((e) => (
+            <ListRow key={e.id} title={e.groupName ?? '—'}
+              subtitle={t('groups.since', { date: formatDate(`${e.joinedOn}T12:00:00Z`) })}
+              onClick={() => navigate(`/groups/${e.groupId}`)} />
+          ))}
+        </Section>
+      )}
+    </>
   )
 }

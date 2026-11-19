@@ -1,6 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { GroupDetailsPage } from '../features/groups/GroupDetailsPage'
+import { GroupFormPage } from '../features/groups/GroupFormPage'
+import { GroupsPage } from '../features/groups/GroupsPage'
 import { HomePage } from '../features/home/HomePage'
 import { CenterPickerPage } from '../features/onboarding/CenterPickerPage'
 import { NoCenterPage } from '../features/onboarding/NoCenterPage'
@@ -65,16 +68,21 @@ function AppRoutes() {
     return <NoCenterPage />
   }
   const managesPeople = activeMembership?.role === 'OWNER' || activeMembership?.role === 'ADMIN'
+  const seesGroups = managesPeople || activeMembership?.role === 'TEACHER'
   return (
     <Routes>
       <Route element={<TabLayout />}>
         <Route path="/" element={activeMembership ? <HomePage /> : <Navigate to="/platform" replace />} />
+        {seesGroups && <Route path="/groups" element={<GroupsPage />} />}
         {managesPeople && <Route path="/students" element={<StudentsPage />} />}
         {managesPeople && <Route path="/teachers" element={<TeachersPage />} />}
         {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
       </Route>
+      {seesGroups && <Route path="/groups/:id" element={<GroupDetailsPage />} />}
       {managesPeople && (
         <>
+          <Route path="/groups/new" element={<GroupFormPage />} />
+          <Route path="/groups/:id/edit" element={<GroupFormPage />} />
           <Route path="/students/new" element={<StudentFormPage />} />
           <Route path="/students/:id" element={<StudentDetailsPage />} />
           <Route path="/students/:id/edit" element={<StudentFormPage />} />

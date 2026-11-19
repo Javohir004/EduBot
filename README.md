@@ -73,3 +73,7 @@ cd web && npm test            # frontend unit/component tests
 | POST/DELETE | `/api/v1/students/{id}/guardians[/{gid}]` | `STUDENT_WRITE` | Link / unlink a guardian (shared by phone) |
 | POST | `/api/v1/students/{id}/guardians/{gid}/invite` | `INVITE_STAFF` | One-time parent invite link |
 | GET/POST/PUT | `/api/v1/teachers[/{id}]` | `TEACHER_MANAGE` | Teachers; `/archive`, `/restore`, `/invite` |
+| GET/POST/PUT | `/api/v1/groups[/{id}]` | `GROUP_*` | Groups (teachers see only their own); `/complete` |
+| PUT | `/api/v1/groups/{id}/schedule` | `GROUP_WRITE` | Replace weekly schedule |
+| GET/POST | `/api/v1/groups/{id}/members` · `/enrollments` | `GROUP_*` | Members / enroll a student |
+| POST/PUT | `/api/v1/enrollments/{id}/end` · `/fee` | `GROUP_WRITE` | Leave group / individual fee |

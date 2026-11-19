@@ -15,6 +15,9 @@ function useTabs(): Tab[] {
   const role = activeMembership?.role
   const tabs: Tab[] = []
   if (activeMembership) tabs.push({ to: '/', label: t('tabs.home'), icon: '🏠' })
+  if (role === 'OWNER' || role === 'ADMIN' || role === 'TEACHER') {
+    tabs.push({ to: '/groups', label: t('tabs.groups'), icon: '👥' })
+  }
   if (role === 'OWNER' || role === 'ADMIN') {
     tabs.push({ to: '/students', label: t('tabs.students'), icon: '🎓' })
     tabs.push({ to: '/teachers', label: t('tabs.teachers'), icon: '👩‍🏫' })
