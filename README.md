@@ -16,6 +16,7 @@ Java 21 · Spring Boot 4 · Spring Security (JWT) · PostgreSQL 18 · Flyway · 
 - Platform onboarding: create a center with a trial subscription and a one-time owner invite
 - Invites: hashed one-time links, phone verified through Telegram's contact sharing in the bot
 - Telegram bot (long polling): `/start inv_<token>` → share contact → membership
+- Attendance with parent absence messages through a transactional outbox (15-min grace, quiet hours, dedup)
 - Students, guardians (shared by siblings) and teachers: search, archive, optimistic locking, plan limits
 - Mini App (React + TypeScript + Tailwind): Telegram theme, tab bar, students/teachers screens, platform centers screen, uz/ru i18n
 - RFC 9457 problem-detail errors, module boundary verification (Spring Modulith)
@@ -77,3 +78,7 @@ cd web && npm test            # frontend unit/component tests
 | PUT | `/api/v1/groups/{id}/schedule` | `GROUP_WRITE` | Replace weekly schedule |
 | GET/POST | `/api/v1/groups/{id}/members` · `/enrollments` | `GROUP_*` | Members / enroll a student |
 | POST/PUT | `/api/v1/enrollments/{id}/end` · `/fee` | `GROUP_WRITE` | Leave group / individual fee |
+| GET | `/api/v1/lessons/today` | `ATTENDANCE_MARK` | Today's scheduled lessons with marking progress |
+| POST | `/api/v1/groups/{id}/lessons` | `ATTENDANCE_MARK` | Open (get-or-create) a lesson |
+| GET/PUT | `/api/v1/lessons/{id}/attendance` | `ATTENDANCE_MARK` | Roster and bulk marking (upsert); absences notify parents |
+| GET | `/api/v1/groups/{id}/attendance?month=` | `ATTENDANCE_MARK` | Monthly attendance grid |

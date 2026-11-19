@@ -161,3 +161,38 @@ export interface EnrollmentDto {
   status: 'ACTIVE' | 'ENDED'
   feeOverride: number | null
 }
+
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'
+
+export interface TodayLesson {
+  groupId: string
+  groupName: string
+  startTime: string
+  endTime: string
+  room: string | null
+  lessonId: string | null
+  studentCount: number
+  markedCount: number
+}
+
+export interface RosterEntry {
+  studentId: string
+  firstName: string
+  lastName: string
+  status: AttendanceStatus | null
+}
+
+export interface LessonView {
+  lessonId: string
+  groupId: string
+  groupName: string
+  date: string
+  startTime: string
+  editable: boolean
+  students: RosterEntry[]
+}
+
+export interface AttendanceHistory {
+  lessons: { lessonId: string; date: string; startTime: string }[]
+  students: { studentId: string; firstName: string; lastName: string; marks: Record<string, AttendanceStatus> }[]
+}

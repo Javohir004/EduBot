@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { AttendanceHistoryPage } from '../features/attendance/AttendanceHistoryPage'
+import { AttendancePage } from '../features/attendance/AttendancePage'
 import { GroupDetailsPage } from '../features/groups/GroupDetailsPage'
 import { GroupFormPage } from '../features/groups/GroupFormPage'
 import { GroupsPage } from '../features/groups/GroupsPage'
@@ -79,6 +81,8 @@ function AppRoutes() {
         {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
       </Route>
       {seesGroups && <Route path="/groups/:id" element={<GroupDetailsPage />} />}
+      {seesGroups && <Route path="/groups/:id/attendance" element={<AttendanceHistoryPage />} />}
+      {seesGroups && <Route path="/lessons/:lessonId" element={<AttendancePage />} />}
       {managesPeople && (
         <>
           <Route path="/groups/new" element={<GroupFormPage />} />

@@ -9,6 +9,7 @@ import { formatDate, formatMoney } from '../../shared/lib/format'
 import { confirmAction, haptic } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { Badge, Button, EmptyState, ListRow, Loading, Screen, SearchInput, Section, SelectField } from '../../shared/ui/ui'
+import { tashkentWeekday, todayIso, useOpenLesson } from '../attendance/api'
 import { useStudents } from '../students/api'
 import { DAYS, useCompleteGroup, useEndEnrollment, useEnroll, useGroup, useGroupMembers, useSaveSchedule } from './api'
 
@@ -63,6 +64,8 @@ function GroupView({ group }: { group: GroupDetails }) {
           subtitle={`${date(group.startDate)} — ${group.endDate ? date(group.endDate) : t('groups.openEnded')}`} />
         {group.subject && <ListRow title={t('groups.subject')} subtitle={group.subject} />}
       </Section>
+
+      <AttendanceActions group={group} />
 
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">{t('groups.schedule')}</h2>
@@ -199,5 +202,31 @@ function StudentPicker({ groupId, exclude, onDone }: { groupId: string; exclude:
       </div>
       {enroll.error && <p className="text-sm text-danger">{errorMessage(enroll.error)}</p>}
     </Section>
+  )
+}
+
+function AttendanceActions({ group }: { group: GroupDetails }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const errorMessage = useErrorMessage()
+  const openLesson = useOpenLesson()
+  const [weekday] = useState(tashkentWeekday)
+  const todaySlot = group.schedule.find((s) => s.day === weekday)
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        {group.status === 'ACTIVE' && todaySlot && (
+          <Button className="flex-1" loading={openLesson.isPending}
+            onClick={() => openLesson.mutate({ groupId: group.id, date: todayIso(), startTime: todaySlot.startTime },
+              { onSuccess: ({ lessonId }) => navigate(`/lessons/${lessonId}`) })}>
+            {t('attendance.markToday')}
+          </Button>
+        )}
+        <Button variant="secondary" className="flex-1" onClick={() => navigate(`/groups/${group.id}/attendance`)}>
+          {t('attendance.history')}
+        </Button>
+      </div>
+      {openLesson.error && <p className="text-sm text-danger">{errorMessage(openLesson.error)}</p>}
+    </div>
   )
 }

@@ -2,11 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useAuth } from '../../app/auth-context'
 import { Screen, Section } from '../../shared/ui/ui'
+import { TodayLessons } from '../attendance/TodayLessons'
 
 export function HomePage() {
   const { t } = useTranslation()
   const { me, activeMembership, isPlatformAdmin, selectMembership } = useAuth()
   const otherMemberships = me.memberships.filter((m) => m.id !== activeMembership?.id)
+  const role = activeMembership?.role
+  const marksAttendance = role === 'OWNER' || role === 'ADMIN' || role === 'TEACHER'
 
   return (
     <Screen>
@@ -19,9 +22,13 @@ export function HomePage() {
         </h1>
       </header>
 
-      <Section>
-        <p className="text-[15px] leading-relaxed text-hint">{t('home.inProgress')}</p>
-      </Section>
+      {marksAttendance ? (
+        <TodayLessons />
+      ) : (
+        <Section>
+          <p className="text-[15px] leading-relaxed text-hint">{t('home.inProgress')}</p>
+        </Section>
+      )}
 
       {isPlatformAdmin && (
         <Link to="/platform" className="block">
