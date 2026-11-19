@@ -1,10 +1,13 @@
 package uz.edubot.billing;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,15 @@ import uz.edubot.billing.BillingRepository.DebtorRow;
 import uz.edubot.billing.BillingRepository.FreePayment;
 import uz.edubot.billing.BillingRepository.OpenCharge;
 import uz.edubot.billing.BillingRepository.PaymentRow;
+import uz.edubot.billing.BillingRepository.OverdueRow;
 import uz.edubot.center.CenterService;
+import uz.edubot.center.CenterSettings;
+import uz.edubot.notification.NotificationService;
+import uz.edubot.notification.NotificationType;
+import uz.edubot.notification.QuietHours;
+import uz.edubot.student.StudentService;
+import uz.edubot.subscription.EntitlementKey;
+import uz.edubot.subscription.EntitlementService;
 import uz.edubot.common.error.ApiException;
 import uz.edubot.common.time.BusinessTime;
 import uz.edubot.group.EnrollmentStartedEvent;
@@ -49,6 +60,9 @@ public class BillingService {
     private final BillingRepository repository;
     private final CenterService centerService;
     private final AuditService audit;
+    private final StudentService studentService;
+    private final NotificationService notifications;
+    private final EntitlementService entitlements;
     private final Clock clock;
 
     public record Balance(BigDecimal debt, BigDecimal credit, List<ChargeRow> charges, List<PaymentRow> payments) {
@@ -186,6 +200,75 @@ public class BillingService {
         Map<String, Object> totals = repository.debtTotals(centerId, today, groupId);
         return new Debtors(((Number) totals.get("students")).longValue(), (BigDecimal) totals.get("total"),
                 rows.stream().map(r -> new Debtor(r, phones.get(r.studentId()))).toList());
+    }
+
+    // ---- reminders ----
+
+    /**
+     * Weekly reminder to parents of students with overdue debt. The dedup key contains the ISO week,
+     * so a daily job sends at most one reminder per student and parent per week.
+     *
+     * @return number of reminders queued
+     */
+    @Transactional
+    public int queueWeeklyReminders() {
+        UUID centerId = TenantContext.require();
+        if (!centerService.settings(centerId).isPaymentRemindersEnabled()
+                || !entitlements.isEnabled(centerId, EntitlementKey.FEATURE_NOTIFICATIONS)) {
+            return 0;
+        }
+        LocalDate today = BusinessTime.today(clock);
+        String week = today.get(IsoFields.WEEK_BASED_YEAR) + "W" + today.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        return queueReminders(centerId, repository.overdue(centerId, today, null), "PAYMENT_REMINDER:%s:%s:" + week);
+    }
+
+    /** Reminder sent from the debtors list now; at most one per student and parent per day. */
+    @Transactional
+    public int remindNow(UUID studentId) {
+        UUID centerId = TenantContext.require();
+        if (!entitlements.isEnabled(centerId, EntitlementKey.FEATURE_NOTIFICATIONS)) {
+            throw new ApiException(HttpStatus.PAYMENT_REQUIRED, "FEATURE_NOT_IN_PLAN", "Notifications are not in the plan");
+        }
+        LocalDate today = BusinessTime.today(clock);
+        // Manual reminders also cover debt that is due today.
+        List<OverdueRow> rows = repository.overdue(centerId, today.plusDays(1), studentId);
+        if (rows.isEmpty()) {
+            throw new ApiException(HttpStatus.CONFLICT, "NO_DEBT", "The student has no overdue debt");
+        }
+        int queued = queueReminders(centerId, rows, "PAYMENT_REMINDER_NOW:%s:%s:" + today);
+        if (queued == 0) {
+            throw new ApiException(HttpStatus.CONFLICT, "NO_LINKED_PARENT", "No parent of this student uses the app");
+        }
+        return queued;
+    }
+
+    private int queueReminders(UUID centerId, List<OverdueRow> rows, String keyPattern) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        String centerName = centerService.findById(centerId).map(c -> c.getName()).orElse("");
+        Map<UUID, List<UUID>> parents = studentService.guardianUserIds(rows.stream().map(OverdueRow::studentId).toList());
+        CenterSettings settings = centerService.settings(centerId);
+        Instant sendAt = QuietHours.shift(clock.instant(), settings.getQuietHoursStart(), settings.getQuietHoursEnd(),
+                BusinessTime.ZONE);
+        int queued = 0;
+        for (OverdueRow row : rows) {
+            Map<String, Object> payload = Map.of("studentName", row.studentName(),
+                    "amount", formatMoney(row.debt()), "centerName", centerName);
+            for (UUID parent : parents.getOrDefault(row.studentId(), List.of())) {
+                notifications.enqueue(centerId, parent, NotificationType.PAYMENT_REMINDER, payload,
+                        keyPattern.formatted(row.studentId(), parent), sendAt);
+                queued++;
+            }
+        }
+        return queued;
+    }
+
+    /** 1200000 -> "1 200 000" */
+    static String formatMoney(BigDecimal amount) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator(' ');
+        return new DecimalFormat("#,##0", symbols).format(amount);
     }
 
     // ---- allocation ----

@@ -27,6 +27,15 @@ interface StudentRepository extends TenantScopedRepository<Student> {
 
     long countByStatus(PersonStatus status);
 
+    /** Active students linked to guardians that belong to the given Telegram user (tenant-filtered). */
+    @Query("""
+            select distinct s from Student s, StudentGuardian sg, Guardian g
+            where sg.studentId = s.id and g.id = sg.guardianId and g.userId = :userId
+              and s.status = uz.edubot.common.PersonStatus.ACTIVE
+            order by s.lastName, s.firstName
+            """)
+    List<Student> findChildrenOfUser(@Param("userId") UUID userId);
+
     @Query("select s from Student s where s.id in :ids")
     List<Student> findByIds(@Param("ids") Collection<UUID> ids);
 }

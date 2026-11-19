@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @RequiredArgsConstructor
-class BillingRepository {
+public class BillingRepository {
 
     private final JdbcTemplate jdbc;
 
@@ -30,11 +30,11 @@ class BillingRepository {
     record FreePayment(UUID id, BigDecimal free) {
     }
 
-    record ChargeRow(UUID id, UUID groupId, String groupName, LocalDate periodStart, LocalDate periodEnd,
+    public record ChargeRow(UUID id, UUID groupId, String groupName, LocalDate periodStart, LocalDate periodEnd,
                      BigDecimal amount, BigDecimal paidAmount, LocalDate dueDate, String status) {
     }
 
-    record PaymentRow(UUID id, BigDecimal amount, BigDecimal allocated, String method, Instant paidAt, String note,
+    public record PaymentRow(UUID id, BigDecimal amount, BigDecimal allocated, String method, Instant paidAt, String note,
                       String status, String voidReason, String receivedByName) {
     }
 
@@ -248,6 +248,21 @@ class BillingRepository {
                         """, (rs, i) -> Map.entry(rs.getObject(1, UUID.class), rs.getString(2)),
                         centerId, studentIds.toArray(UUID[]::new))
                 .stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    record OverdueRow(UUID studentId, String studentName, BigDecimal debt) {
+    }
+
+    /** Students with debt on charges whose due date is before {@code before} (optionally one student). */
+    List<OverdueRow> overdue(UUID centerId, LocalDate before, UUID studentId) {
+        return jdbc.query("""
+                        select s.id, s.first_name || ' ' || s.last_name, sum(c.amount - c.paid_amount)
+                        from tuition_charge c join student s on s.center_id = c.center_id and s.id = c.student_id
+                        where c.center_id = ? and c.status = 'OPEN' and c.paid_amount < c.amount and c.due_date < ?
+                          and s.status = 'ACTIVE' and (?::uuid is null or s.id = ?::uuid)
+                        group by s.id, s.first_name, s.last_name
+                        """, (rs, i) -> new OverdueRow(rs.getObject(1, UUID.class), rs.getString(2), rs.getBigDecimal(3)),
+                centerId, before, studentId, studentId);
     }
 
     List<UUID> activeCenterIds() {

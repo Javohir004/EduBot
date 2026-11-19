@@ -24,6 +24,19 @@ class MonthlyChargeJob {
     private final BillingService billingService;
     private final Clock clock;
 
+    /** Weekly payment reminders, queued at 10:00 so they arrive during the day. */
+    @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Tashkent")
+    @SchedulerLock(name = "payment-reminders", lockAtMostFor = "PT30M")
+    void reminders() {
+        for (UUID centerId : repository.activeCenterIds()) {
+            try {
+                TenantContext.runAs(centerId, billingService::queueWeeklyReminders);
+            } catch (RuntimeException e) {
+                log.error("Payment reminders failed centerId={}", centerId, e);
+            }
+        }
+    }
+
     @Scheduled(cron = "0 30 0 * * *", zone = "Asia/Tashkent")
     @SchedulerLock(name = "monthly-charges", lockAtMostFor = "PT30M")
     void run() {

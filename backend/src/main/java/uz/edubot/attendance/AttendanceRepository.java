@@ -71,6 +71,23 @@ class AttendanceRepository {
                 """, centerId, lessonId, studentId, status.name(), markedBy, java.sql.Timestamp.from(now));
     }
 
+    record StudentMarkRow(LocalDate date, LocalTime startTime, String groupName, AttendanceStatus status) {
+    }
+
+    List<StudentMarkRow> recentMarksOfStudent(UUID centerId, UUID studentId, LocalDate from) {
+        return jdbc.query("""
+                        select l.lesson_date, l.start_time, g.name, a.status
+                        from attendance a
+                        join lesson l on l.center_id = a.center_id and l.id = a.lesson_id
+                        join study_group g on g.center_id = l.center_id and g.id = l.group_id
+                        where a.center_id = ? and a.student_id = ? and l.lesson_date >= ?
+                        order by l.lesson_date desc, l.start_time desc
+                        limit 60
+                        """, (rs, i) -> new StudentMarkRow(rs.getObject(1, LocalDate.class), rs.getObject(2, LocalTime.class),
+                        rs.getString(3), AttendanceStatus.valueOf(rs.getString(4))),
+                centerId, studentId, from);
+    }
+
     List<MarkRow> findMarks(UUID centerId, Collection<UUID> lessonIds) {
         if (lessonIds.isEmpty()) {
             return List.of();

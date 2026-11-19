@@ -97,6 +97,13 @@ class BillingController {
         return Map.of("studentsCharged", billingService.generateForMonth(month));
     }
 
+    @PostMapping("/debtors/{studentId}/remind")
+    @PreAuthorize("hasAuthority('PAYMENT_WRITE')")
+    Map<String, Integer> remind(@PathVariable UUID studentId) {
+        studentService.get(studentId);
+        return Map.of("queued", billingService.remindNow(studentId));
+    }
+
     @GetMapping("/debtors")
     @PreAuthorize("hasAuthority('PAYMENT_READ')")
     DebtorsResponse debtors(@RequestParam(required = false) UUID groupId,

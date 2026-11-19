@@ -58,6 +58,10 @@ public class CenterMembership {
         this.status = MembershipStatus.ACTIVE;
     }
 
+    void revoke() {
+        this.status = MembershipStatus.REVOKED;
+    }
+
     void activate() {
         this.status = MembershipStatus.ACTIVE;
     }

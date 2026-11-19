@@ -28,6 +28,9 @@ public class CenterSettings {
     private boolean absenceNotificationsEnabled = true;
 
     @Column(nullable = false)
+    private boolean paymentRemindersEnabled = true;
+
+    @Column(nullable = false)
     private LocalTime quietHoursStart = LocalTime.of(22, 0);
 
     @Column(nullable = false)
@@ -39,5 +42,11 @@ public class CenterSettings {
 
     CenterSettings(UUID centerId) {
         this.centerId = centerId;
+    }
+
+    void update(int paymentDueDay, boolean absenceNotificationsEnabled, boolean paymentRemindersEnabled) {
+        this.paymentDueDay = (short) paymentDueDay;
+        this.absenceNotificationsEnabled = absenceNotificationsEnabled;
+        this.paymentRemindersEnabled = paymentRemindersEnabled;
     }
 }

@@ -66,6 +66,11 @@ public class StudentService {
         return students.findByIds(ids).stream().collect(Collectors.toMap(Student::getId, Function.identity()));
     }
 
+    @Transactional(readOnly = true)
+    public List<Student> childrenOfUser(UUID userId) {
+        return students.findChildrenOfUser(userId);
+    }
+
     /** Telegram user ids of guardians who use the app, per student. */
     @Transactional(readOnly = true)
     public Map<UUID, List<UUID>> guardianUserIds(Collection<UUID> studentIds) {

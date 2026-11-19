@@ -26,6 +26,7 @@ import uz.edubot.platform.PlatformDtos.CreatedCenterResponse;
 import uz.edubot.platform.PlatformDtos.PlanResponse;
 import uz.edubot.security.CurrentMember;
 import uz.edubot.subscription.SubscriptionService;
+import uz.edubot.subscription.SubscriptionState;
 
 @RestController
 @RequestMapping("/api/v1/platform")
@@ -56,6 +57,22 @@ class PlatformController {
     @PatchMapping("/centers/{id}/status")
     CenterSummary changeStatus(@PathVariable UUID id, @Valid @RequestBody ChangeStatusRequest request) {
         return platformService.changeStatus(id, request.status());
+    }
+
+    /** Manual activation/extension after the center paid (no online payments in the MVP). */
+    @PostMapping("/centers/{id}/subscriptions")
+    SubscriptionStateResponse activate(@AuthenticationPrincipal CurrentMember admin, @PathVariable UUID id,
+                                       @Valid @RequestBody ActivateRequest request) {
+        platformService.requireCenter(id);
+        SubscriptionState state = subscriptionService.activate(id, request.planCode(), request.months(), admin.userId());
+        return new SubscriptionStateResponse(state.planCode(), state.phase().name(), state.endsAt());
+    }
+
+    record ActivateRequest(@jakarta.validation.constraints.NotBlank String planCode,
+                           @jakarta.validation.constraints.Min(1) @jakarta.validation.constraints.Max(24) int months) {
+    }
+
+    record SubscriptionStateResponse(String planCode, String phase, java.time.Instant endsAt) {
     }
 
     @GetMapping("/plans")

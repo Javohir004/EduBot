@@ -186,6 +186,18 @@ public class AttendanceService {
         return new History(lessons.stream().map(l -> new HistoryLesson(l.id(), l.date(), l.startTime())).toList(), rows);
     }
 
+    public record StudentMark(LocalDate date, LocalTime startTime, String groupName, AttendanceStatus status) {
+    }
+
+    /** The student's marks for the last {@code days} days, newest first. */
+    @Transactional(readOnly = true)
+    public List<StudentMark> recentForStudent(UUID studentId, int days) {
+        return repository.recentMarksOfStudent(TenantContext.require(), studentId,
+                        BusinessTime.today(clock).minusDays(days)).stream()
+                .map(r -> new StudentMark(r.date(), r.startTime(), r.groupName(), r.status()))
+                .toList();
+    }
+
     private void updateAbsenceNotifications(UUID centerId, StudyGroup group, AttendanceRepository.LessonRow lesson,
                                             List<Mark> marks, Map<UUID, Student> roster) {
         List<UUID> absent = marks.stream().filter(m -> m.status() == AttendanceStatus.ABSENT).map(Mark::studentId).toList();

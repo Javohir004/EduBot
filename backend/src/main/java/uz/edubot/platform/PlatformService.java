@@ -57,6 +57,12 @@ class PlatformService {
         return PageResponse.of(page, c -> CenterSummary.of(c, subscriptions.get(c.getId())));
     }
 
+    @Transactional(readOnly = true)
+    void requireCenter(UUID centerId) {
+        centerService.findById(centerId)
+                .orElseThrow(() -> uz.edubot.common.error.ApiException.notFound("CENTER_NOT_FOUND", "Center not found"));
+    }
+
     @Transactional
     CenterSummary changeStatus(UUID centerId, CenterStatus status) {
         EducationCenter center = centerService.changeStatus(centerId, status);

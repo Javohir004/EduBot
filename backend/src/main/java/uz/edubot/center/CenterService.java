@@ -37,6 +37,14 @@ public class CenterService {
                 .orElseThrow(() -> new IllegalStateException("Center without settings: " + centerId));
     }
 
+    @Transactional
+    public CenterSettings updateSettings(UUID centerId, int paymentDueDay, boolean absenceNotifications,
+                                         boolean paymentReminders) {
+        CenterSettings current = settings(centerId);
+        current.update(paymentDueDay, absenceNotifications, paymentReminders);
+        return current;
+    }
+
     @Transactional(readOnly = true)
     public Page<EducationCenter> findAll(Pageable pageable) {
         return centers.findAll(pageable);
