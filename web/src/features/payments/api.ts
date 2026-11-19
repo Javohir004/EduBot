@@ -44,6 +44,12 @@ export function useRecordPayment(studentId: string, idempotencyKey: string) {
   )
 }
 
+export function useRemind() {
+  return useMutation({
+    mutationFn: (studentId: string) => api<{ queued: number }>(`/api/v1/debtors/${studentId}/remind`, { method: 'POST' }),
+  })
+}
+
 export function useVoidPayment(studentId: string) {
   return useBalanceWrite(studentId, (input: { paymentId: string; reason: string }) =>
     api(`/api/v1/payments/${input.paymentId}/void`, { method: 'POST', body: json({ reason: input.reason }) }),

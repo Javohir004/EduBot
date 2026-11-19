@@ -27,6 +27,18 @@ export function usePlans() {
   })
 }
 
+export function useActivateSubscription() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { centerId: string; planCode: string; months: number }) =>
+      api(`/api/v1/platform/centers/${input.centerId}/subscriptions`, {
+        method: 'POST',
+        body: json({ planCode: input.planCode, months: input.months }),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: centersKey }),
+  })
+}
+
 export function useCreateCenter() {
   const queryClient = useQueryClient()
   return useMutation({

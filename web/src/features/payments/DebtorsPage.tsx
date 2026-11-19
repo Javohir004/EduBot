@@ -1,15 +1,24 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { useErrorMessage } from '../../shared/i18n'
 import { formatDate, formatMoney } from '../../shared/lib/format'
 import { Button, EmptyState, Loading, Screen, Section } from '../../shared/ui/ui'
-import { useDebtors } from './api'
+import { haptic } from '../../shared/telegram/telegram'
+import { useDebtors, useRemind } from './api'
 
 export function DebtorsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const errorMessage = useErrorMessage()
   const debtors = useDebtors()
+  const remind = useRemind()
+  const [reminded, setReminded] = useState<Set<string>>(new Set())
+  const sendReminder = (studentId: string) =>
+    remind.mutate(studentId, {
+      onSuccess: () => { haptic('success'); setReminded((s) => new Set(s).add(studentId)) },
+      onError: () => haptic('error'),
+    })
 
   return (
     <Screen title={t('payments.title')}>
@@ -47,13 +56,19 @@ export function DebtorsPage() {
                 </button>
                 <div className="flex flex-col items-end gap-1">
                   <span className="font-semibold text-danger">{formatMoney(d.debt)}</span>
-                  {phone && <a href={`tel:${phone}`} className="text-sm text-link">📞 {t('people.call')}</a>}
+                  <span className="flex gap-3">
+                    {phone && <a href={`tel:${phone}`} className="text-sm text-link">📞 {t('people.call')}</a>}
+                    {reminded.has(d.studentId)
+                      ? <span className="text-sm text-emerald-600">✓ {t('payments.reminded')}</span>
+                      : <button type="button" className="text-sm text-link" onClick={() => sendReminder(d.studentId)}>🔔 {t('payments.remind')}</button>}
+                  </span>
                 </div>
               </div>
             )
           })}
         </Section>
       )}
+      {remind.error && <p className="text-sm text-danger">{errorMessage(remind.error)}</p>}
     </Screen>
   )
 }

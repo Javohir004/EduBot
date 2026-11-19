@@ -87,3 +87,9 @@ cd web && npm test            # frontend unit/component tests
 | POST | `/api/v1/payments/{id}/void` | `PAYMENT_VOID` | Void with reason (audited) |
 | PUT/POST | `/api/v1/charges/{id}` · `/void` | `PAYMENT_VOID` | Correct or void a charge (audited) |
 | GET | `/api/v1/debtors` | `PAYMENT_READ` | Debtors with totals and parent phone |
+| POST | `/api/v1/debtors/{studentId}/remind` | `PAYMENT_WRITE` | Send a payment reminder to linked parents now |
+| GET | `/api/v1/subscription` | `CENTER_READ` | Plan, phase (ACTIVE/GRACE/EXPIRED), usage and limits |
+| POST | `/api/v1/platform/centers/{id}/subscriptions` | `PLATFORM_MANAGE` | Renew / change plan manually |
+| GET/PUT | `/api/v1/center/settings` | `CENTER_*` | Notification toggles, payment due day |
+| GET/DELETE | `/api/v1/staff[/{membershipId}]` | `STAFF_MANAGE` | Staff list, revoke access |
+| GET | `/api/v1/parent/children[/{id}]` | `CHILD_READ` | Parent view: own children, attendance, debt |

@@ -10,6 +10,8 @@ import { HomePage } from '../features/home/HomePage'
 import { CenterPickerPage } from '../features/onboarding/CenterPickerPage'
 import { NoCenterPage } from '../features/onboarding/NoCenterPage'
 import { DebtorsPage } from '../features/payments/DebtorsPage'
+import { ChildPage } from '../features/parent/ParentPages'
+import { SettingsPage } from '../features/settings/SettingsPage'
 import { PlatformCentersPage } from '../features/platform/PlatformCentersPage'
 import { StudentDetailsPage } from '../features/students/StudentDetailsPage'
 import { StudentFormPage } from '../features/students/StudentFormPage'
@@ -83,6 +85,8 @@ function AppRoutes() {
         {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
       </Route>
       {seesGroups && <Route path="/groups/:id" element={<GroupDetailsPage />} />}
+      {activeMembership?.role === 'OWNER' && <Route path="/settings" element={<SettingsPage />} />}
+      {activeMembership?.role === 'PARENT' && <Route path="/children/:id" element={<ChildPage />} />}
       {seesGroups && <Route path="/groups/:id/attendance" element={<AttendanceHistoryPage />} />}
       {seesGroups && <Route path="/lessons/:lessonId" element={<AttendancePage />} />}
       {managesPeople && (

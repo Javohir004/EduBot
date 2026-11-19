@@ -3,6 +3,8 @@ import { Link } from 'react-router'
 import { useAuth } from '../../app/auth-context'
 import { Screen, Section } from '../../shared/ui/ui'
 import { TodayLessons } from '../attendance/TodayLessons'
+import { ParentChildren } from '../parent/ParentPages'
+import { SubscriptionBanner } from '../settings/SubscriptionBanner'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -22,12 +24,28 @@ export function HomePage() {
         </h1>
       </header>
 
+      {(role === 'OWNER' || role === 'ADMIN' || role === 'TEACHER') && <SubscriptionBanner />}
+
       {marksAttendance ? (
         <TodayLessons />
+      ) : role === 'PARENT' ? (
+        <ParentChildren />
       ) : (
         <Section>
           <p className="text-[15px] leading-relaxed text-hint">{t('home.inProgress')}</p>
         </Section>
+      )}
+
+      {role === 'OWNER' && (
+        <Link to="/settings" className="block">
+          <Section className="flex items-center justify-between active:opacity-80">
+            <span>
+              <span className="block font-medium">{t('settings.title')}</span>
+              <span className="block text-sm text-hint">{t('settings.hint')}</span>
+            </span>
+            <span className="text-hint">›</span>
+          </Section>
+        </Link>
       )}
 
       {isPlatformAdmin && (
