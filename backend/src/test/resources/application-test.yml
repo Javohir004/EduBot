@@ -1,0 +1,8 @@
+edubot:
+  telegram:
+    bot-token: 123456:TEST-ONLY-TOKEN
+    bot-username: edubot_test_bot
+  jwt:
+    secret: test-only-jwt-secret-0123456789-abcdefghij
+  platform:
+    admin-telegram-ids: 999000
