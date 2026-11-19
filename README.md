@@ -82,3 +82,8 @@ cd web && npm test            # frontend unit/component tests
 | POST | `/api/v1/groups/{id}/lessons` | `ATTENDANCE_MARK` | Open (get-or-create) a lesson |
 | GET/PUT | `/api/v1/lessons/{id}/attendance` | `ATTENDANCE_MARK` | Roster and bulk marking (upsert); absences notify parents |
 | GET | `/api/v1/groups/{id}/attendance?month=` | `ATTENDANCE_MARK` | Monthly attendance grid |
+| GET | `/api/v1/students/{id}/balance` | `PAYMENT_READ` | Debt, credit, charges, payments |
+| POST | `/api/v1/students/{id}/payments` | `PAYMENT_WRITE` | Record payment (`Idempotency-Key` header), FIFO allocation |
+| POST | `/api/v1/payments/{id}/void` | `PAYMENT_VOID` | Void with reason (audited) |
+| PUT/POST | `/api/v1/charges/{id}` · `/void` | `PAYMENT_VOID` | Correct or void a charge (audited) |
+| GET | `/api/v1/debtors` | `PAYMENT_READ` | Debtors with totals and parent phone |

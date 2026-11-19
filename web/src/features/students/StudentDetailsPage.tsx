@@ -9,6 +9,7 @@ import { confirmAction, haptic } from '../../shared/telegram/telegram'
 import { useBackButton } from '../../shared/telegram/useBackButton'
 import { InviteLinkCard } from '../../shared/ui/InviteLinkCard'
 import { useStudentEnrollments } from '../groups/api'
+import { StudentBalance } from '../payments/StudentBalance'
 import { Badge, Button, EmptyState, Field, ListRow, Loading, Screen, Section, SelectField } from '../../shared/ui/ui'
 import { RELATIONS, useAddGuardian, useInviteGuardian, useRemoveGuardian, useSetStudentArchived, useStudent } from './api'
 
@@ -64,6 +65,8 @@ function StudentDetailsView({ student, t }: { student: StudentDetails; t: Return
       </Section>
 
       <StudentGroups studentId={student.id} />
+
+      <StudentBalance studentId={student.id} archived={archived} />
 
       {invite && (
         <InviteLinkCard title={t('people.inviteTitle')} text={t('people.inviteText')} link={invite.link}

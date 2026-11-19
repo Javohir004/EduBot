@@ -196,3 +196,53 @@ export interface AttendanceHistory {
   lessons: { lessonId: string; date: string; startTime: string }[]
   students: { studentId: string; firstName: string; lastName: string; marks: Record<string, AttendanceStatus> }[]
 }
+
+export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'OTHER'
+
+export interface ChargeDto {
+  id: string
+  groupId: string
+  groupName: string
+  periodStart: string
+  periodEnd: string
+  amount: number
+  paidAmount: number
+  dueDate: string
+  status: 'OPEN' | 'VOID'
+  paymentStatus: 'PAID' | 'PARTIAL' | 'UNPAID' | 'VOID'
+}
+
+export interface PaymentDto {
+  id: string
+  amount: number
+  allocated: number
+  method: PaymentMethod
+  paidAt: string
+  note: string | null
+  status: 'ACTIVE' | 'VOIDED'
+  voidReason: string | null
+  receivedBy: string
+}
+
+export interface BalanceResponse {
+  debt: number
+  credit: number
+  charges: ChargeDto[]
+  payments: PaymentDto[]
+}
+
+export interface DebtorDto {
+  studentId: string
+  firstName: string
+  lastName: string
+  phone: string | null
+  guardianPhone: string | null
+  debt: number
+  oldestDue: string
+}
+
+export interface DebtorsResponse {
+  students: number
+  total: number
+  items: DebtorDto[]
+}

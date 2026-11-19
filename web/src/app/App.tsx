@@ -9,6 +9,7 @@ import { GroupsPage } from '../features/groups/GroupsPage'
 import { HomePage } from '../features/home/HomePage'
 import { CenterPickerPage } from '../features/onboarding/CenterPickerPage'
 import { NoCenterPage } from '../features/onboarding/NoCenterPage'
+import { DebtorsPage } from '../features/payments/DebtorsPage'
 import { PlatformCentersPage } from '../features/platform/PlatformCentersPage'
 import { StudentDetailsPage } from '../features/students/StudentDetailsPage'
 import { StudentFormPage } from '../features/students/StudentFormPage'
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="/" element={activeMembership ? <HomePage /> : <Navigate to="/platform" replace />} />
         {seesGroups && <Route path="/groups" element={<GroupsPage />} />}
         {managesPeople && <Route path="/students" element={<StudentsPage />} />}
+        {managesPeople && <Route path="/payments" element={<DebtorsPage />} />}
         {managesPeople && <Route path="/teachers" element={<TeachersPage />} />}
         {isPlatformAdmin && <Route path="/platform" element={<PlatformCentersPage />} />}
       </Route>

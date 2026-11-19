@@ -20,9 +20,11 @@ function useTabs(): Tab[] {
   }
   if (role === 'OWNER' || role === 'ADMIN') {
     tabs.push({ to: '/students', label: t('tabs.students'), icon: '🎓' })
+    tabs.push({ to: '/payments', label: t('tabs.payments'), icon: '💳' })
     tabs.push({ to: '/teachers', label: t('tabs.teachers'), icon: '👩‍🏫' })
   }
-  if (isPlatformAdmin) tabs.push({ to: '/platform', label: t('tabs.platform'), icon: '⚙️' })
+  // With a center the platform screen is reached from Home, keeping the tab bar at five items.
+  if (isPlatformAdmin && !activeMembership) tabs.push({ to: '/platform', label: t('tabs.platform'), icon: '⚙️' })
   return tabs
 }
 
