@@ -7,6 +7,9 @@ import java.util.function.Supplier;
 /**
  * Center id of the current unit of work. Set from the authenticated membership for HTTP requests
  * and explicitly via {@link #runAs} for scheduled jobs. Never set from client input.
+ *
+ * <p>Hibernate reads the tenant when a session opens, so {@link #runAs} must wrap the call to a
+ * {@code @Transactional} service (starting a new session), not run inside an existing transaction.
  */
 public final class TenantContext {
 

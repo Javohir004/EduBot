@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class InviteService {
     private final MembershipService membershipService;
     private final UserService userService;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     @Value("${edubot.telegram.bot-username}")
     private String botUsername;
@@ -52,16 +54,28 @@ public class InviteService {
         if (required == null || !member.has(required)) {
             throw new ApiException(HttpStatus.FORBIDDEN, "INVITE_ROLE_FORBIDDEN", "You cannot invite this role");
         }
-        return create(member.requireCenterId(), role, phone, member.userId());
+        return create(member.requireCenterId(), role, phone, null, member.userId());
+    }
+
+    /**
+     * Invite that links the accepting user to an existing teacher or guardian profile.
+     * The caller has already verified that the profile belongs to the member's center.
+     */
+    @Transactional
+    public CreatedInvite createForProfile(CurrentMember member, MembershipRole role, String phone, UUID targetId) {
+        if (role != MembershipRole.TEACHER && role != MembershipRole.PARENT) {
+            throw new IllegalArgumentException("Profiles exist only for teachers and parents");
+        }
+        return create(member.requireCenterId(), role, phone, targetId, member.userId());
     }
 
     @Transactional
-    public CreatedInvite create(UUID centerId, MembershipRole role, String rawPhone, UUID createdBy) {
+    public CreatedInvite create(UUID centerId, MembershipRole role, String rawPhone, UUID targetId, UUID createdBy) {
         String phone = PhoneNumbers.normalize(rawPhone)
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "INVALID_PHONE", "Invalid phone number"));
         String token = InviteTokens.generate();
         Invite invite = invites.save(new Invite(centerId, role, phone, InviteTokens.hash(token),
-                clock.instant().plus(VALIDITY), createdBy));
+                clock.instant().plus(VALIDITY), targetId, createdBy));
         log.info("Invite created id={} centerId={} role={}", invite.getId(), centerId, role);
         return new CreatedInvite(invite, "https://t.me/" + botUsername + "?start=" + InviteTokens.START_PREFIX + token);
     }
@@ -121,6 +135,9 @@ public class InviteService {
         userService.markPhoneVerified(user.getId(), phone);
         membershipService.grant(invite.getCenterId(), user.getId(), invite.getRole());
         invite.markUsed(user.getId(), clock.instant());
+        // Listeners (teacher, student modules) link their profile inside this transaction.
+        events.publishEvent(new InviteAcceptedEvent(invite.getCenterId(), invite.getRole(), invite.getTargetId(),
+                user.getId()));
         log.info("Invite accepted id={} userId={} role={}", invite.getId(), user.getId(), invite.getRole());
         return new AcceptedInvite(center.getId(), center.getName(), invite.getRole());
     }

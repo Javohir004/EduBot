@@ -1,6 +1,8 @@
 package uz.edubot.common.phone;
 
 import java.util.Optional;
+import org.springframework.http.HttpStatus;
+import uz.edubot.common.error.ApiException;
 
 /**
  * Normalizes phone numbers to E.164 ({@code +998901234567}). A bare 9-digit number is treated as
@@ -32,6 +34,17 @@ public final class PhoneNumbers {
             return Optional.empty();
         }
         return Optional.of("+" + digits);
+    }
+
+    /** Normalized phone or a 400 {@code INVALID_PHONE} API error. */
+    public static String require(String raw) {
+        return normalize(raw).orElseThrow(() ->
+                new ApiException(HttpStatus.BAD_REQUEST, "INVALID_PHONE", "Invalid phone number"));
+    }
+
+    /** Like {@link #require} but blank input means "no phone". */
+    public static String optional(String raw) {
+        return raw == null || raw.isBlank() ? null : require(raw);
     }
 
     /** Masks all but the last four digits, for logs and lists: {@code +998*****4567}. */

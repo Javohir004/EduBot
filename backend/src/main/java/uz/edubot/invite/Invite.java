@@ -51,6 +51,10 @@ public class Invite {
 
     private Instant revokedAt;
 
+    /** Teacher or guardian profile linked to the accepting user; null for staff-only invites. */
+    @Column(updatable = false)
+    private UUID targetId;
+
     @Column(updatable = false)
     private UUID createdBy;
 
@@ -59,7 +63,8 @@ public class Invite {
     private Instant createdAt;
 
     Invite(UUID centerId, MembershipRole role, String expectedPhone, String tokenHash, Instant expiresAt,
-           UUID createdBy) {
+           UUID targetId, UUID createdBy) {
+        this.targetId = targetId;
         this.centerId = centerId;
         this.role = role;
         this.expectedPhone = expectedPhone;

@@ -42,7 +42,7 @@ class PlatformService {
         EducationCenter center = centerService.create(request.name(), request.phone(), request.address());
         SubscriptionView subscription = subscriptionService.startTrial(center.getId(), request.planCode(),
                 Duration.ofDays(request.trialDaysOrDefault()), platformAdminId);
-        CreatedInvite invite = inviteService.create(center.getId(), MembershipRole.OWNER, request.ownerPhone(),
+        CreatedInvite invite = inviteService.create(center.getId(), MembershipRole.OWNER, request.ownerPhone(), null,
                 platformAdminId);
         log.info("Center created id={} plan={}", center.getId(), subscription.planCode());
         return new CreatedCenterResponse(CenterSummary.of(center, subscription),

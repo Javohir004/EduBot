@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import uz.edubot.center.MembershipRole;
@@ -23,9 +22,6 @@ import uz.edubot.user.TelegramProfile;
 class InviteFlowIT extends IntegrationTestSupport {
 
     private static final String OWNER_PHONE = "+998901112233";
-
-    @Autowired
-    private InviteService inviteService;
 
     @Test
     void ownerAcceptsPlatformInviteAndGetsCenterBoundToken() throws Exception {
