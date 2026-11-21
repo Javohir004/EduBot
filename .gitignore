@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Build output
 target/
@@ -15,3 +16,6 @@ logs/
 *.iml
 .vscode/
 .DS_Store
+
+# Production backups (compose.prod.yaml)
+backups/
