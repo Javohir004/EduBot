@@ -29,8 +29,8 @@ the code on 2026-11-21. "Test" names the automated test that proves the control.
 
 | Item | Why | Plan |
 |---|---|---|
-| HTTPS, HSTS, CSP headers | Set at the reverse proxy | Caddy config with automatic TLS, `Strict-Transport-Security`, `Content-Security-Policy` allowing `telegram.org` script |
-| Backups | Data loss | Daily `pg_dump`, encrypted, stored off the server; one restore test |
+| HTTPS, HSTS, CSP headers | Set at the reverse proxy | Configured in `web/Caddyfile` (automatic TLS, HSTS, CSP allowing the `telegram.org` script, Telegram-only `frame-ancestors`); verify on the server |
+| Backups | Data loss | `backup` service: daily `pg_dump` encrypted with age, retention; restore tested locally. Still to do: copy off the server, one restore test in production |
 | Rotate the dev bot token | It was visible once in a local session log | `/revoke` in @BotFather before going public |
 | Personal data localization | Law ZRU-547 (2021 amendment) | Legal check; host in Uzbekistan for commercial use |
-| Actuator exposure | Health only, but on the public port | Expose only through the internal network in production |
+| Actuator exposure | Health only | Production: backend publishes no ports and Caddy proxies only `/api/*` |

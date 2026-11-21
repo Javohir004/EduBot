@@ -49,7 +49,8 @@ flowchart LR
 Modular monolith with module boundaries verified by Spring Modulith; shared-schema multi-tenancy
 (`center_id` + Hibernate `@TenantId`, composite foreign keys); notifications through a
 transactional outbox. Details: [docs/architecture.md](docs/architecture.md) ·
-security review: [docs/security.md](docs/security.md).
+security review: [docs/security.md](docs/security.md) · production deployment:
+[docs/deploy.md](docs/deploy.md).
 
 ## Stack
 

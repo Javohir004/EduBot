@@ -352,10 +352,10 @@ Payment providers (post-MVP): first accept EduBot subscription payments via Paym
 - `backend/Dockerfile`: multi-stage (Maven → `eclipse-temurin:21-jre`), non-root user, layered jar.
 - `web/Dockerfile`: Node 24 build → `caddy:2` serving the SPA, proxying `/api`, managing TLS.
 - `compose.yaml` (local): PostgreSQL + backend. The frontend runs with `vite dev` behind a Cloudflare tunnel (Mini Apps need HTTPS).
-- `compose.prod.yaml`: PostgreSQL, backend, Caddy, backup job.
+- `compose.prod.yaml`: PostgreSQL, backend, Caddy (`web/Caddyfile`), backup job (`backup/`: daily `pg_dump` encrypted with age). Step-by-step guide: `docs/deploy.md`.
 - Flyway runs on application startup. Docker healthcheck uses `/actuator/health/liveness`. Logs are structured JSON with a request-id in MDC.
 - `.env.example`: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `JWT_SECRET`, `APP_PUBLIC_URL`, `PLATFORM_ADMIN_TELEGRAM_IDS`.
-- GitHub Actions: backend job, frontend job, Docker build on `main`. CD is manual for the MVP (`ssh` + `docker compose up -d`).
+- GitHub Actions: backend job, frontend job, Docker images (backend, web, backup) pushed to GHCR on `main`. CD is manual for the MVP (`ssh` + `docker compose up -d`).
 - Hosting: a 2 vCPU / 4 GB VPS (~$5–10/month) is assumed to be enough for the first few dozen centers.
 
 ## 16. Nine-day roadmap

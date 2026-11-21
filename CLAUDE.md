@@ -7,9 +7,10 @@ security status: `docs/security.md`, user-facing overview and API table: `README
 ## Status (2026-11-21)
 
 - MVP complete (roadmap days 1–8 + security pass, README, screenshots). CI green on `main`.
-- **Next: deployment** — VPS + domain + HTTPS (Caddy) + daily encrypted `pg_dump` backups + production
-  bot. Open items are listed at the end of `docs/security.md`. Waiting for the user's VPS, domain and
-  production bot token.
+- **Next: deployment.** Files are ready and verified locally: `compose.prod.yaml`, `web/Dockerfile` +
+  `web/Caddyfile`, `backup/` (age-encrypted `pg_dump`), `.env.production.example`, guide
+  `docs/deploy.md`; CI pushes images to GHCR on `main`. Waiting for the user's VPS, domain and
+  production bot. Open items: end of `docs/security.md`.
 - Before going public: rotate the dev bot token in @BotFather (it was visible once in a local log).
 
 ## Run locally (what the user does each time)
@@ -39,6 +40,8 @@ Only one backend may run at a time (port 8080 and bot long polling).
 - `backend/mvnw` must keep the git executable bit (CI fails with exit 126 otherwise).
 - Hibernate reads the tenant when a session opens: `TenantContext.runAs` must wrap a call into a
   `@Transactional` service, never run inside an open transaction. Native SQL always passes `center_id`.
+- `compose.prod.yaml` uses project name `edubot-prod`; local test: `--env-file <scratch file>` with
+  `EDUBOT_ENV_FILE`, `DOMAIN=http://localhost`, `HTTP_PORT`/`HTTPS_PORT`, `TELEGRAM_BOT_ENABLED=false`.
 - Telegram Desktop may bring an open Mini App to front without reloading (stale auth state).
 - The bash tool mis-parses some heredocs with quotes; for multi-file edits write a Python script to the
   scratchpad and run it.
