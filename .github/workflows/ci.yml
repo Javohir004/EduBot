@@ -70,7 +70,8 @@ jobs:
           build backup backup
       - name: Check production compose file
         run: |
-          sed -e 's/^DB_PASSWORD=$/DB_PASSWORD=ci/' -e 's/^BACKUP_AGE_RECIPIENT=$/BACKUP_AGE_RECIPIENT=age1ci/' \n            .env.production.example > .env
+          sed -e 's/^DB_PASSWORD=$/DB_PASSWORD=ci/' -e 's/^BACKUP_AGE_RECIPIENT=$/BACKUP_AGE_RECIPIENT=age1ci/' \
+            .env.production.example > .env
           docker compose -f compose.prod.yaml config --quiet
           rm .env
       - name: Push to GHCR
