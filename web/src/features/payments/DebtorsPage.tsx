@@ -47,16 +47,17 @@ export function DebtorsPage() {
           {debtors.data.items.map((d) => {
             const phone = d.guardianPhone ?? d.phone
             return (
-              <div key={d.studentId} className="flex items-center justify-between gap-3 px-4 py-3">
-                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => navigate(`/students/${d.studentId}`)}>
-                  <span className="block truncate font-medium">{d.lastName} {d.firstName}</span>
-                  <span className="block text-sm text-hint">
+              <div key={d.studentId} className="flex flex-col gap-1.5 px-4 py-3">
+                <button type="button" className="flex items-baseline justify-between gap-3 text-left"
+                  onClick={() => navigate(`/students/${d.studentId}`)}>
+                  <span className="min-w-0 truncate font-medium">{d.lastName} {d.firstName}</span>
+                  <span className="shrink-0 font-semibold text-danger tabular-nums">{formatMoney(d.debt)}</span>
+                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm whitespace-nowrap text-hint">
                     {t('payments.since', { date: formatDate(`${d.oldestDue}T12:00:00Z`) })}
                   </span>
-                </button>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="font-semibold text-danger">{formatMoney(d.debt)}</span>
-                  <span className="flex gap-3">
+                  <span className="flex shrink-0 gap-4">
                     {phone && <a href={`tel:${phone}`} className="text-sm text-link">📞 {t('people.call')}</a>}
                     {reminded.has(d.studentId)
                       ? <span className="text-sm text-emerald-600">✓ {t('payments.reminded')}</span>

@@ -22,6 +22,7 @@ the code on 2026-11-21. "Test" names the automated test that proves the control.
 | 15 | Secrets in the repository | Secrets only in env / git-ignored `.env`; `application.yml` holds placeholders (test enforces it); gitleaks in CI | ✅ | `ApplicationConfigTest`, CI secret scan |
 | 16 | Notification spam / wrong recipient | Only guardians who linked their own Telegram account; dedup keys; quiet hours; 15-min grace for corrections | ✅ | `AttendanceApiIT`, `ParentsRemindersStaffIT` |
 | 17 | Half-started instance consuming bot updates | Polling starts on `ApplicationReadyEvent`; updates handled on the polling thread | ✅ | manual (startup with busy port) |
+| 19 | Vulnerable dependencies | Dependabot weekly for Maven, npm and GitHub Actions | ✅ | `.github/dependabot.yml` |
 | 18 | Expired subscription keeps writing | Read-only guard returns 402 after the grace period; data is never deleted | ✅ | `SubscriptionLifecycleIT` |
 
 ## Open items (deployment phase)
@@ -30,7 +31,6 @@ the code on 2026-11-21. "Test" names the automated test that proves the control.
 |---|---|---|
 | HTTPS, HSTS, CSP headers | Set at the reverse proxy | Caddy config with automatic TLS, `Strict-Transport-Security`, `Content-Security-Policy` allowing `telegram.org` script |
 | Backups | Data loss | Daily `pg_dump`, encrypted, stored off the server; one restore test |
-| Dependency updates | Known CVEs | Enable Dependabot for Maven, npm and GitHub Actions |
 | Rotate the dev bot token | It was visible once in a local session log | `/revoke` in @BotFather before going public |
 | Personal data localization | Law ZRU-547 (2021 amendment) | Legal check; host in Uzbekistan for commercial use |
 | Actuator exposure | Health only, but on the public port | Expose only through the internal network in production |
