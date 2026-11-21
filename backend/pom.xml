@@ -22,6 +22,7 @@
         <springdoc.version>3.2.0</springdoc.version>
         <telegrambots.version>10.3.0</telegrambots.version>
         <shedlock.version>7.11.0</shedlock.version>
+        <bucket4j.version>8.22.0</bucket4j.version>
     </properties>
 
     <dependencies>
@@ -89,6 +90,17 @@
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-client</artifactId>
             <version>${telegrambots.version}</version>
+        </dependency>
+
+        <!-- Rate limiting (in-memory buckets, bounded by Caffeine) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <!-- Scheduled jobs run once even if two instances are started -->

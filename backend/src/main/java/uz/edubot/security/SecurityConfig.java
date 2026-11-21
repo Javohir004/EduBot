@@ -1,5 +1,6 @@
 package uz.edubot.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,7 +21,9 @@ class SecurityConfig {
 
     @Bean
     SecurityFilterChain apiSecurity(HttpSecurity http, ProblemDetailSecurityHandler problemHandler,
-                                    MemberAuthenticationConverter memberConverter) throws Exception {
+                                    MemberAuthenticationConverter memberConverter,
+                                    @Value("${edubot.rate-limit.auth-per-minute:20}") int authPerMinute,
+                                    @Value("${edubot.rate-limit.api-per-minute:600}") int apiPerMinute) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -40,6 +43,7 @@ class SecurityConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(problemHandler)
                         .accessDeniedHandler(problemHandler))
+                .addFilterBefore(new RateLimitFilter(authPerMinute, apiPerMinute), BearerTokenAuthenticationFilter.class)
                 .addFilterAfter(new TenantContextFilter(), BearerTokenAuthenticationFilter.class);
         return http.build();
     }

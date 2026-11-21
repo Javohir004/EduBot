@@ -12,3 +12,6 @@ edubot:
     public-url: https://app.example.test
   scheduling:
     enabled: false
+  rate-limit:
+    auth-per-minute: 100000
+    api-per-minute: 100000

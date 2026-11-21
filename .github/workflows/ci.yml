@@ -50,8 +50,16 @@ jobs:
     needs: backend
     steps:
       - uses: actions/checkout@v5
+      # Retries: the build downloads base images and Maven dependencies, which occasionally
+      # fails on the network (runs with the same Dockerfile pass and fail intermittently).
       - name: Build image
-        run: docker build -t edubot-backend:ci backend
+        run: |
+          for attempt in 1 2 3; do
+            if docker build -t edubot-backend:ci backend; then exit 0; fi
+            echo "Docker build attempt $attempt failed, retrying in 20s"
+            sleep 20
+          done
+          exit 1
 
   secrets-scan:
     name: Secret scan
