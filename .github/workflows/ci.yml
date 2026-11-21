@@ -59,7 +59,9 @@ jobs:
         run: |
           build() {
             for attempt in 1 2 3; do
-              if docker build -t "edubot-$1:ci" "$2"; then return 0; fi
+              # The source label links each GHCR package to this repository, which lets GITHUB_TOKEN write to it.
+              if docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+                  -t "edubot-$1:ci" "$2"; then return 0; fi
               echo "Docker build of $1 attempt $attempt failed, retrying in 20s"
               sleep 20
             done
