@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import org.telegram.telegrambots.meta.api.methods.menubutton.SetChatMenuButton;
+import org.telegram.telegrambots.meta.api.objects.menubutton.MenuButtonWebApp;
+import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -37,13 +40,18 @@ class BotConfig {
 
         private final TelegramBotsLongPollingApplication application;
         private final BotUpdateHandler handler;
+        private final TelegramClient telegram;
         private final String botToken;
+        private final String miniAppUrl;
 
-        BotStarter(TelegramBotsLongPollingApplication application, BotUpdateHandler handler,
-                   @Value("${edubot.telegram.bot-token}") String botToken) {
+        BotStarter(TelegramBotsLongPollingApplication application, BotUpdateHandler handler, TelegramClient telegram,
+                   @Value("${edubot.telegram.bot-token}") String botToken,
+                   @Value("${edubot.app.public-url:}") String miniAppUrl) {
             this.application = application;
             this.handler = handler;
+            this.telegram = telegram;
             this.botToken = botToken;
+            this.miniAppUrl = miniAppUrl;
         }
 
         /**
@@ -54,6 +62,26 @@ class BotConfig {
         void start() throws TelegramApiException {
             application.registerBot(botToken, handler);
             log.info("Telegram bot long polling started");
+            updateMenuButton();
+        }
+
+        /**
+         * Points the bot's default menu button at the current Mini App URL, so a changed URL
+         * (e.g. a new dev tunnel) needs no manual step in @BotFather.
+         */
+        private void updateMenuButton() {
+            if (miniAppUrl == null || !miniAppUrl.startsWith("https://")) {
+                log.warn("MINI_APP_URL is not an https URL: the bot menu button was not updated");
+                return;
+            }
+            try {
+                telegram.execute(SetChatMenuButton.builder()
+                        .menuButton(MenuButtonWebApp.builder().text("EduBot").webAppInfo(new WebAppInfo(miniAppUrl)).build())
+                        .build());
+                log.info("Bot menu button points to {}", miniAppUrl);
+            } catch (TelegramApiException e) {
+                log.warn("Could not update the bot menu button: {}", e.getMessage());
+            }
         }
     }
 }

@@ -87,18 +87,19 @@ cd backend && ./mvnw spring-boot:run
 
 Run the backend in Docker instead: `docker compose --profile app up -d --build`.
 
-### Open the Mini App in Telegram (local)
+### Open the Mini App in Telegram (local) — two steps
 
-Telegram only opens Mini Apps over HTTPS, so expose the Vite dev server through a tunnel:
+Telegram opens Mini Apps only over HTTPS. One script prepares everything:
 
-```bash
-cd web && npm install && npm run dev                 # http://localhost:5173, proxies /api to :8080
-cloudflared tunnel --url http://localhost:5173      # prints an https://*.trycloudflare.com URL
+```powershell
+.\scripts\dev.ps1        # PostgreSQL + builds web/dist + Cloudflare tunnel; writes MINI_APP_URL to .env
 ```
 
-1. Put the tunnel URL into `.env` as `MINI_APP_URL` and restart the backend.
-2. In @BotFather: *Bot Settings → Menu Button* → set the same URL.
-3. Open the bot, press the menu button. Your Telegram id from `PLATFORM_ADMIN_TELEGRAM_IDS` gets the platform screen.
+Then press **Run** in IntelliJ (or `cd backend && ./mvnw spring-boot:run`). The backend serves the
+built Mini App itself (`FRONTEND_DIST_DIR`) and, on startup, points the bot's menu button at the new
+tunnel URL — nothing to change in @BotFather. Keep the script window open (it holds the tunnel).
+
+Frontend hot reload while editing UI code: `cd web && npm run dev` (http://localhost:5173, proxies `/api`).
 
 ### Demo data
 

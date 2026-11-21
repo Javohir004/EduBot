@@ -30,11 +30,20 @@ class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Telegram Web shows Mini Apps in an iframe: allow only Telegram as the embedding parent.
+                .headers(h -> h
+                        .frameOptions(f -> f.disable())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "frame-ancestors 'self' https://web.telegram.org https://*.telegram.org")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/telegram").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Mini App files when the backend serves web/dist (local development).
+                        .requestMatchers(request -> "GET".equals(request.getMethod())
+                                && !request.getRequestURI().startsWith("/api/")
+                                && !request.getRequestURI().startsWith("/actuator")).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(memberConverter))

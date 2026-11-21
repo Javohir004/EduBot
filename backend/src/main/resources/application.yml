@@ -74,6 +74,9 @@ edubot:
   demo:
     # Only used with the "demo" Spring profile: this Telegram user owns the demo center.
     owner-telegram-id: ${DEMO_OWNER_TELEGRAM_ID:}
+  frontend:
+    # Local development: absolute path of web/dist to serve the Mini App from the backend.
+    dist-dir: ${FRONTEND_DIST_DIR:}
   app:
     # HTTPS URL of the Mini App (required by Telegram for web_app buttons)
     public-url: ${MINI_APP_URL:}
