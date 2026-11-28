@@ -21,7 +21,7 @@
         <spring-modulith.version>2.2.0</spring-modulith.version>
         <springdoc.version>3.2.1</springdoc.version>
         <telegrambots.version>10.3.0</telegrambots.version>
-        <shedlock.version>7.11.0</shedlock.version>
+        <shedlock.version>7.12.0</shedlock.version>
         <bucket4j.version>8.22.0</bucket4j.version>
     </properties>
 
